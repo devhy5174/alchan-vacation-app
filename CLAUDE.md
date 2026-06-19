@@ -37,20 +37,51 @@
 
 - pages : 화면 단위
 - components : 공통 UI 컴포넌트
-- features : 기능별 컴포넌트
+- features : 기능별 컴포넌트 (도메인 단위 하위 폴더로 구분)
+- routes : 라우팅 설정
 - stores : Zustand 상태관리
 - types : 타입 정의
 - utils : 공통 함수 및 LocalStorage 관리
 
-예시
+현재 구조
 
+```
 src/
 ├─ pages/
+│   ├─ HomePage.tsx
+│   └─ CalendarPage.tsx
 ├─ components/
+│   ├─ Button.tsx
+│   ├─ Input.tsx
+│   ├─ BottomNavigation.tsx
+│   ├─ AlertModal.tsx
+│   ├─ ConfirmModal.tsx
+│   └─ TimePickerModal.tsx
 ├─ features/
+│   ├─ vacation/
+│   │   ├─ VacationForm.tsx
+│   │   ├─ VacationPreviewCard.tsx
+│   │   ├─ WeeklyScheduleForm.tsx
+│   │   ├─ DayScheduleEditor.tsx
+│   │   └─ RepeatTaskAdder.tsx
+│   ├─ calendar/
+│   │   ├─ CalendarListView.tsx
+│   │   ├─ CalendarMonthView.tsx
+│   │   └─ DayDetailModal.tsx
+│   └─ memo/
+│       └─ MemoSection.tsx
+├─ routes/
+│   └─ AppRoutes.tsx
 ├─ stores/
+│   ├─ vacationStore.ts
+│   └─ completionStore.ts
 ├─ types/
+│   ├─ vacation.ts
+│   └─ completion.ts
 └─ utils/
+    ├─ date.ts
+    └─ localStorage.ts
+```
 
 ---
 
@@ -58,17 +89,18 @@ src/
 
 학부모가 아이의 방학 계획을 입력하고 관리할 수 있는 기본 기능 구현
 
-### MVP 1단계
+### MVP 1단계 ✅ 완료
 
-구현 기능
-
-- 아이 이름 입력
-- 방학 시작일 입력
-- 방학 종료일 입력
-- 방학 목표 입력
-- Zustand 상태 저장
-- LocalStorage 저장
-- 저장 내용 미리보기
+- 아이 이름 / 방학 기간 / 목표 입력 및 수정
+- 요일별 할 일 추가 / 수정 / 삭제 (시간 선택 포함)
+- 반복 할 일 여러 요일에 한 번에 추가
+- Zustand + LocalStorage 상태 저장
+- 저장 내용 미리보기 카드
+- 캘린더 만들기: 리스트 보기 + 달력 보기 탭
+- 날짜별 할 일 완료 체크 (게이지 + 달성 시각화)
+- 오늘 날짜 자동 스크롤 및 강조 표시
+- 자유 메모 (LocalStorage 자동 저장)
+- 앱 진입 시 캘린더 자동 이동 (데이터 있을 때)
 
 ### 현재 구현하지 않는 기능
 
@@ -78,10 +110,10 @@ src/
 - DB
 - React Query
 - PDF 저장
-- 알림 기능
-- 복잡한 캘린더
+- 푸시 알림
 - 스티커 기능
 - 다이어리 꾸미기
+- 연속 달성 기록
 
 ---
 
