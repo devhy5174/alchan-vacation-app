@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { FiBookOpen, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar } from "react-icons/fi";
+import AlertModal from "../../components/AlertModal";
 import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
 import { getDaysInRange, getDayOfWeek, toDateStr } from "../../utils/date";
@@ -99,6 +100,7 @@ export default function CalendarDiaryView({ plan }: Props) {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [pendingIdx, setPendingIdx] = useState(0);
   const [dir, setDir] = useState<"next" | "prev">("next");
+  const [showAlert, setShowAlert] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   function navigate(newIdx: number, direction: "next" | "prev") {
@@ -318,7 +320,7 @@ export default function CalendarDiaryView({ plan }: Props) {
                       return (
                         <li
                           key={`w-${i}`}
-                          onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                          onClick={() => isToday ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
                           style={{
                             height: `${LINE_H}px`,
@@ -346,7 +348,7 @@ export default function CalendarDiaryView({ plan }: Props) {
                       return (
                         <li
                           key={`s-${task.id}`}
-                          onClick={() => toggleSpecTask(dateStr, task.id)}
+                          onClick={() => isToday ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
                           style={{
                             height: `${LINE_H}px`,
@@ -474,6 +476,15 @@ export default function CalendarDiaryView({ plan }: Props) {
         </button>
       </div>
 
+      {showAlert && (
+        <AlertModal
+          message="오늘 할 일이 아니에요"
+          subMessage="할 일 체크는 해당 날짜에만 할 수 있어요"
+          icon={<FiCalendar size={40} />}
+          buttonLabel="확인"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 }

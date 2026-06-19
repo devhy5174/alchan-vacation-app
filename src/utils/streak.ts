@@ -32,8 +32,9 @@ export function calcCurrentStreak(
   specCompletion: SpecificCompletionRecord
 ): number {
   const today = toDateStr(new Date());
-  // 미래 날짜 완료 체크도 반영 (방학 사전 계획 지원)
-  const dates = getDaysInRange(plan.startDate, plan.endDate).map((d) => toDateStr(d));
+  const dates = getDaysInRange(plan.startDate, plan.endDate)
+    .map((d) => toDateStr(d))
+    .filter((d) => d <= today);
 
   let streak = 0;
   for (let i = dates.length - 1; i >= 0; i--) {
@@ -56,7 +57,10 @@ export function calcMaxStreak(
   specTasks: SpecificTaskRecord,
   specCompletion: SpecificCompletionRecord
 ): number {
-  const dates = getDaysInRange(plan.startDate, plan.endDate).map((d) => toDateStr(d));
+  const today = toDateStr(new Date());
+  const dates = getDaysInRange(plan.startDate, plan.endDate)
+    .map((d) => toDateStr(d))
+    .filter((d) => d <= today);
 
   let maxStreak = 0;
   let current = 0;
@@ -73,14 +77,18 @@ export function calcMaxStreak(
   return maxStreak;
 }
 
-// 날짜별 연속 달성 카운트 계산 (달력 보기 마일스톤 표시용)
+// 날짜별 연속 달성 카운트 (오늘까지만 / 달력 마일스톤 표시용)
 export function calcStreakPerDay(
   plan: VacationPlan,
   completion: CompletionRecord,
   specTasks: SpecificTaskRecord,
   specCompletion: SpecificCompletionRecord
 ): Record<string, number> {
-  const dates = getDaysInRange(plan.startDate, plan.endDate).map((d) => toDateStr(d));
+  const today = toDateStr(new Date());
+  const dates = getDaysInRange(plan.startDate, plan.endDate)
+    .map((d) => toDateStr(d))
+    .filter((d) => d <= today);
+
   const result: Record<string, number> = {};
   let streak = 0;
 

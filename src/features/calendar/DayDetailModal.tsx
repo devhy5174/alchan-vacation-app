@@ -1,7 +1,9 @@
-import { FiX, FiCircle, FiCheckCircle, FiStar } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiX, FiCircle, FiCheckCircle, FiStar, FiCalendar } from 'react-icons/fi';
+import AlertModal from '../../components/AlertModal';
 import type { VacationPlan } from '../../types/vacation';
 import { DAY_LABELS } from '../../types/vacation';
-import { getDayOfWeek } from '../../utils/date';
+import { getDayOfWeek, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
 import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 
@@ -15,6 +17,8 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
   const { completion, toggleTask } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
 
+  const canToggle = dateStr === toDateStr(new Date());
+  const [showAlert, setShowAlert] = useState(false);
   const date = new Date(dateStr);
   const day = getDayOfWeek(date);
   const weeklyTasks = plan.weeklySchedule?.[day] ?? [];
@@ -56,7 +60,7 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
                     <li key={`w-${i}`} className="flex items-start gap-2.5">
                       <button
                         type="button"
-                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                        onClick={() => canToggle ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                         className="mt-0.5 shrink-0 cursor-pointer transition-colors"
                       >
                         {done
@@ -65,7 +69,7 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
                         }
                       </button>
                       <span
-                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                        onClick={() => canToggle ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                         className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'text-gray-700'}`}
                       >
                         {task.time && (
@@ -85,7 +89,7 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
                     <li key={`s-${task.id}`} className="flex items-start gap-2.5">
                       <button
                         type="button"
-                        onClick={() => toggleSpecTask(dateStr, task.id)}
+                        onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                         className="mt-0.5 shrink-0 cursor-pointer transition-colors"
                       >
                         {done
@@ -97,7 +101,7 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
                         <FiStar size={12} className="mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
                       )}
                       <span
-                        onClick={() => toggleSpecTask(dateStr, task.id)}
+                        onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                         className={`text-sm leading-snug cursor-pointer select-none
                           ${done ? 'line-through text-gray-300'
                             : task.important ? 'font-medium text-orange-500'
@@ -144,6 +148,16 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      {showAlert && (
+        <AlertModal
+          message="오늘 할 일이 아니에요"
+          subMessage="할 일 체크는 해당 날짜에만 할 수 있어요"
+          icon={<FiCalendar size={40} />}
+          buttonLabel="확인"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { FiCircle, FiCheckCircle, FiStar } from 'react-icons/fi';
+import { useEffect, useRef, useState } from 'react';
+import { FiCircle, FiCheckCircle, FiStar, FiCalendar } from 'react-icons/fi';
+import AlertModal from '../../components/AlertModal';
 import type { VacationPlan } from '../../types/vacation';
 import { DAY_LABELS } from '../../types/vacation';
 import { getDaysInRange, getDayOfWeek, formatShortDate, toDateStr } from '../../utils/date';
@@ -13,6 +14,7 @@ interface Props {
 export default function CalendarListView({ plan }: Props) {
   const { completion, toggleTask } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
+  const [showAlert, setShowAlert] = useState(false);
 
   const dates = getDaysInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
@@ -42,6 +44,7 @@ export default function CalendarListView({ plan }: Props) {
         const totalCount = weeklyTasks.length + specificTasks.length;
         const allDone = totalCount > 0 && completedCount === totalCount;
         const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+        const canToggle = isToday;
 
         return (
           <div
@@ -78,7 +81,7 @@ export default function CalendarListView({ plan }: Props) {
                         <li key={`w-${i}`} className="flex items-start gap-2">
                           <button
                             type="button"
-                            onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                            onClick={() => canToggle ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                             className="mt-0.5 shrink-0 cursor-pointer transition-colors"
                             aria-label={done ? '완료 취소' : '완료'}
                           >
@@ -88,7 +91,7 @@ export default function CalendarListView({ plan }: Props) {
                             }
                           </button>
                           <span
-                            onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                            onClick={() => canToggle ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                             className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'text-gray-700'}`}
                           >
                             {task.time && (
@@ -108,7 +111,7 @@ export default function CalendarListView({ plan }: Props) {
                         <li key={`s-${task.id}`} className="flex items-start gap-2">
                           <button
                             type="button"
-                            onClick={() => toggleSpecTask(dateStr, task.id)}
+                            onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                             className="mt-0.5 shrink-0 cursor-pointer transition-colors"
                             aria-label={done ? '완료 취소' : '완료'}
                           >
@@ -121,7 +124,7 @@ export default function CalendarListView({ plan }: Props) {
                             <FiStar size={11} className="mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
                           )}
                           <span
-                            onClick={() => toggleSpecTask(dateStr, task.id)}
+                            onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                             className={`text-sm leading-snug cursor-pointer select-none
                               ${done ? 'line-through text-gray-300'
                                 : task.important ? 'font-medium text-orange-500'
@@ -162,6 +165,16 @@ export default function CalendarListView({ plan }: Props) {
           </div>
         );
       })}
+
+      {showAlert && (
+        <AlertModal
+          message="오늘 할 일이 아니에요"
+          subMessage="할 일 체크는 해당 날짜에만 할 수 있어요"
+          icon={<FiCalendar size={40} />}
+          buttonLabel="확인"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 }
