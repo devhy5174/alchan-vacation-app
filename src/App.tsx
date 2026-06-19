@@ -1,9 +1,5 @@
-function App() {
-  return (
-    <>
-      <h1>알찬방학</h1>
-    </>
-  );
-}
+import AppRoutes from './routes/AppRoutes';
 
-export default App;
+export default function App() {
+  return <AppRoutes />;
+}
