@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { FiClock } from 'react-icons/fi';
 import { DAYS_OF_WEEK, DAY_LABELS } from '../../types/vacation';
 import type { DayOfWeek, Task } from '../../types/vacation';
 import Button from '../../components/Button';
+import TimePickerModal from '../../components/TimePickerModal';
 
 interface Props {
   onAdd: (task: Task, days: DayOfWeek[]) => void;
@@ -20,6 +22,7 @@ export default function RepeatTaskAdder({ onAdd }: Props) {
   const [taskInput, setTaskInput] = useState('');
   const [timeInput, setTimeInput] = useState('');
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([]);
+  const [showPicker, setShowPicker] = useState(false);
 
   const toggleDay = (day: DayOfWeek) => {
     setSelectedDays((prev) =>
@@ -37,16 +40,30 @@ export default function RepeatTaskAdder({ onAdd }: Props) {
   };
 
   return (
+    <>
+      {showPicker && (
+        <TimePickerModal
+          value={timeInput || undefined}
+          onConfirm={(t) => { setTimeInput(t); setShowPicker(false); }}
+          onClear={() => { setTimeInput(''); setShowPicker(false); }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
+
     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex flex-col gap-3">
       <span className="text-sm font-bold text-gray-700">반복 할 일 추가</span>
 
       <div className="flex gap-1.5">
-        <input
-          type="time"
-          value={timeInput}
-          onChange={(e) => setTimeInput(e.target.value)}
-          className="w-24 shrink-0 px-2 py-2 text-sm rounded-lg border border-orange-200 bg-white text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300"
-        />
+        <button
+          type="button"
+          onClick={() => setShowPicker(true)}
+          className="flex items-center gap-1 shrink-0 px-2 py-2 rounded-lg border border-orange-200 bg-white text-xs font-medium hover:border-orange-300 transition-colors cursor-pointer"
+        >
+          <FiClock size={12} className="text-orange-400" />
+          <span className={timeInput ? 'text-orange-400' : 'text-gray-400'}>
+            {timeInput || '시간'}
+          </span>
+        </button>
         <input
           type="text"
           value={taskInput}
@@ -106,5 +123,6 @@ export default function RepeatTaskAdder({ onAdd }: Props) {
         선택한 요일에 추가
       </Button>
     </div>
+    </>
   );
 }
