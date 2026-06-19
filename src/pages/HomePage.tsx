@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiRepeat, FiStar } from "react-icons/fi";
 import VacationForm from "../features/vacation/VacationForm";
 import VacationPreviewCard from "../features/vacation/VacationPreviewCard";
 import WeeklyScheduleForm from "../features/vacation/WeeklyScheduleForm";
+import SpecificDateTaskForm from "../features/vacation/SpecificDateTaskForm";
 import MemoSection from "../features/memo/MemoSection";
 import { useVacationStore } from "../stores/vacationStore";
+
+type TaskTab = "repeat" | "specific";
 
 export default function HomePage() {
   const plan = useVacationStore((s) => s.plan);
   const [formOpen, setFormOpen] = useState(!plan);
+  const [taskTab, setTaskTab] = useState<TaskTab>("repeat");
 
   return (
     <div className="px-4 py-8">
@@ -20,6 +24,7 @@ export default function HomePage() {
 
         {plan && <VacationPreviewCard />}
 
+        {/* 방학 정보 입력 */}
         <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
           <button
             type="button"
@@ -44,9 +49,43 @@ export default function HomePage() {
         {plan && (
           <>
             <MemoSection />
-            <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-              <h2 className="text-base font-bold text-gray-800 mb-4">요일별 할 일</h2>
-              <WeeklyScheduleForm />
+
+            {/* 할 일 관리 카드 (탭) */}
+            <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+              {/* 탭 헤더 */}
+              <div className="flex border-b border-orange-100">
+                <button
+                  type="button"
+                  onClick={() => setTaskTab("repeat")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors cursor-pointer
+                    ${taskTab === "repeat"
+                      ? "text-orange-400 border-b-2 border-orange-400"
+                      : "text-gray-400 hover:text-gray-600"}`}
+                >
+                  <FiRepeat size={13} />
+                  반복 할 일
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskTab("specific")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors cursor-pointer
+                    ${taskTab === "specific"
+                      ? "text-orange-400 border-b-2 border-orange-400"
+                      : "text-gray-400 hover:text-gray-600"}`}
+                >
+                  <FiStar size={13} />
+                  특별 할 일
+                </button>
+              </div>
+
+              {/* 탭 콘텐츠 */}
+              <div className="p-5">
+                {taskTab === "repeat" ? (
+                  <WeeklyScheduleForm />
+                ) : (
+                  <SpecificDateTaskForm />
+                )}
+              </div>
             </div>
           </>
         )}

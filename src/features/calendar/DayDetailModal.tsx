@@ -1,8 +1,9 @@
-import { FiX, FiCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiX, FiCircle, FiCheckCircle, FiStar } from 'react-icons/fi';
 import type { VacationPlan } from '../../types/vacation';
 import { DAY_LABELS } from '../../types/vacation';
 import { getDayOfWeek } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
+import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 
 interface Props {
   dateStr: string;
@@ -12,14 +13,22 @@ interface Props {
 
 export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
   const { completion, toggleTask } = useCompletionStore();
+  const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
 
   const date = new Date(dateStr);
   const day = getDayOfWeek(date);
-  const tasks = plan.weeklySchedule?.[day] ?? [];
+  const weeklyTasks = plan.weeklySchedule?.[day] ?? [];
+  const specificTasks = specTasks[dateStr] ?? [];
+
   const completions = completion[dateStr] ?? [];
-  const completedCount = tasks.filter((_, i) => completions[i] ?? false).length;
-  const allDone = tasks.length > 0 && completedCount === tasks.length;
-  const pct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+  const specDone = specCompletion[dateStr] ?? {};
+
+  const weeklyDoneCount = weeklyTasks.filter((_, i) => completions[i] ?? false).length;
+  const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
+  const completedCount = weeklyDoneCount + specDoneCount;
+  const totalCount = weeklyTasks.length + specificTasks.length;
+  const allDone = totalCount > 0 && completedCount === totalCount;
+  const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const label = `${date.getMonth() + 1}월 ${date.getDate()}일 (${DAY_LABELS[day]})`;
 
   return (
@@ -38,17 +47,17 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
 
           {/* 할 일 목록 */}
           <div className="flex-1 overflow-y-auto px-5 pb-4">
-            {tasks.length > 0 ? (
+            {totalCount > 0 ? (
               <ul className="flex flex-col gap-3">
-                {tasks.map((task, i) => {
+                {/* 반복 할 일 */}
+                {weeklyTasks.map((task, i) => {
                   const done = completions[i] ?? false;
                   return (
-                    <li key={i} className="flex items-start gap-2.5">
+                    <li key={`w-${i}`} className="flex items-start gap-2.5">
                       <button
                         type="button"
-                        onClick={() => toggleTask(dateStr, i, tasks.length)}
+                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
                         className="mt-0.5 shrink-0 cursor-pointer transition-colors"
-                        aria-label={done ? '완료 취소' : '완료'}
                       >
                         {done
                           ? <FiCheckCircle size={17} className="text-orange-400" />
@@ -56,8 +65,43 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
                         }
                       </button>
                       <span
-                        onClick={() => toggleTask(dateStr, i, tasks.length)}
+                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
                         className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'text-gray-700'}`}
+                      >
+                        {task.time && (
+                          <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>
+                            [{task.time}]
+                          </span>
+                        )}
+                        {task.text}
+                      </span>
+                    </li>
+                  );
+                })}
+                {/* 특별 할 일 */}
+                {specificTasks.map((task) => {
+                  const done = specDone[task.id] ?? false;
+                  return (
+                    <li key={`s-${task.id}`} className="flex items-start gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleSpecTask(dateStr, task.id)}
+                        className="mt-0.5 shrink-0 cursor-pointer transition-colors"
+                      >
+                        {done
+                          ? <FiCheckCircle size={17} className="text-orange-400" />
+                          : <FiCircle size={17} className="text-gray-300" />
+                        }
+                      </button>
+                      {task.important && !done && (
+                        <FiStar size={12} className="mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
+                      )}
+                      <span
+                        onClick={() => toggleSpecTask(dateStr, task.id)}
+                        className={`text-sm leading-snug cursor-pointer select-none
+                          ${done ? 'line-through text-gray-300'
+                            : task.important ? 'font-medium text-orange-500'
+                            : 'text-gray-700'}`}
                       >
                         {task.time && (
                           <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>
@@ -77,17 +121,16 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
 
           {/* 게이지 + 확인 버튼 */}
           <div className="px-5 pt-3 pb-5 flex flex-col gap-3 border-t border-gray-100">
-            {tasks.length > 0 && (
+            {totalCount > 0 && (
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ease-out
-                      ${allDone ? 'bg-orange-500' : 'bg-orange-400'}`}
+                    className={`h-full rounded-full transition-all duration-500 ease-out ${allDone ? 'bg-orange-500' : 'bg-orange-400'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
                 <span className={`text-xs font-semibold shrink-0 ${allDone ? 'text-orange-400' : 'text-gray-400'}`}>
-                  {completedCount}/{tasks.length}
+                  {completedCount}/{totalCount}
                 </span>
               </div>
             )}

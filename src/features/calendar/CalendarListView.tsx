@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { FiCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiCircle, FiCheckCircle, FiStar } from 'react-icons/fi';
 import type { VacationPlan } from '../../types/vacation';
 import { DAY_LABELS } from '../../types/vacation';
 import { getDaysInRange, getDayOfWeek, formatShortDate, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
+import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 
 interface Props {
   plan: VacationPlan;
@@ -11,6 +12,8 @@ interface Props {
 
 export default function CalendarListView({ plan }: Props) {
   const { completion, toggleTask } = useCompletionStore();
+  const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
+
   const dates = getDaysInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
   const todayStr = toDateStr(new Date());
@@ -24,14 +27,21 @@ export default function CalendarListView({ plan }: Props) {
     <div className="flex flex-col gap-2">
       {dates.map((date) => {
         const day = getDayOfWeek(date);
-        const tasks = schedule?.[day] ?? [];
-        const isWeekend = day === 'sat' || day === 'sun';
+        const weeklyTasks = schedule?.[day] ?? [];
         const dateStr = toDateStr(date);
+        const isWeekend = day === 'sat' || day === 'sun';
         const isToday = dateStr === todayStr;
+
+        const specificTasks = specTasks[dateStr] ?? [];
         const completions = completion[dateStr] ?? [];
-        const completedCount = tasks.filter((_, i) => completions[i] ?? false).length;
-        const allDone = tasks.length > 0 && completedCount === tasks.length;
-        const pct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+        const specDone = specCompletion[dateStr] ?? {};
+
+        const weeklyDoneCount = weeklyTasks.filter((_, i) => completions[i] ?? false).length;
+        const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
+        const completedCount = weeklyDoneCount + specDoneCount;
+        const totalCount = weeklyTasks.length + specificTasks.length;
+        const allDone = totalCount > 0 && completedCount === totalCount;
+        const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
         return (
           <div
@@ -59,15 +69,16 @@ export default function CalendarListView({ plan }: Props) {
 
               {/* 할 일 목록 */}
               <div className="flex-1 min-w-0">
-                {tasks.length > 0 ? (
+                {totalCount > 0 ? (
                   <ul className="flex flex-col gap-1">
-                    {tasks.map((task, i) => {
+                    {/* 반복 할 일 */}
+                    {weeklyTasks.map((task, i) => {
                       const done = completions[i] ?? false;
                       return (
-                        <li key={i} className="flex items-start gap-2">
+                        <li key={`w-${i}`} className="flex items-start gap-2">
                           <button
                             type="button"
-                            onClick={() => toggleTask(dateStr, i, tasks.length)}
+                            onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
                             className="mt-0.5 shrink-0 cursor-pointer transition-colors"
                             aria-label={done ? '완료 취소' : '완료'}
                           >
@@ -77,8 +88,44 @@ export default function CalendarListView({ plan }: Props) {
                             }
                           </button>
                           <span
-                            onClick={() => toggleTask(dateStr, i, tasks.length)}
+                            onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
                             className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'text-gray-700'}`}
+                          >
+                            {task.time && (
+                              <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>
+                                [{task.time}]
+                              </span>
+                            )}
+                            {task.text}
+                          </span>
+                        </li>
+                      );
+                    })}
+                    {/* 특별 할 일 */}
+                    {specificTasks.map((task) => {
+                      const done = specDone[task.id] ?? false;
+                      return (
+                        <li key={`s-${task.id}`} className="flex items-start gap-2">
+                          <button
+                            type="button"
+                            onClick={() => toggleSpecTask(dateStr, task.id)}
+                            className="mt-0.5 shrink-0 cursor-pointer transition-colors"
+                            aria-label={done ? '완료 취소' : '완료'}
+                          >
+                            {done
+                              ? <FiCheckCircle size={15} className="text-orange-400" />
+                              : <FiCircle size={15} className="text-gray-300" />
+                            }
+                          </button>
+                          {task.important && !done && (
+                            <FiStar size={11} className="mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
+                          )}
+                          <span
+                            onClick={() => toggleSpecTask(dateStr, task.id)}
+                            className={`text-sm leading-snug cursor-pointer select-none
+                              ${done ? 'line-through text-gray-300'
+                                : task.important ? 'font-medium text-orange-500'
+                                : 'text-gray-700'}`}
                           >
                             {task.time && (
                               <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>
@@ -98,7 +145,7 @@ export default function CalendarListView({ plan }: Props) {
             </div>
 
             {/* 진행 게이지 */}
-            {tasks.length > 0 && (
+            {totalCount > 0 && (
               <div className="px-4 pb-3 flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
@@ -108,7 +155,7 @@ export default function CalendarListView({ plan }: Props) {
                   />
                 </div>
                 <span className={`text-xs font-semibold shrink-0 ${allDone ? 'text-orange-400' : 'text-gray-400'}`}>
-                  {completedCount}/{tasks.length}
+                  {completedCount}/{totalCount}
                 </span>
               </div>
             )}

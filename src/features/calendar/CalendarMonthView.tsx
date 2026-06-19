@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { VacationPlan } from '../../types/vacation';
 import { getDayOfWeek, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
+import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 import DayDetailModal from './DayDetailModal';
 
 interface Props {
@@ -37,6 +38,7 @@ function buildMonthGrid(year: number, month: number): (Date | null)[] {
 export default function CalendarMonthView({ plan }: Props) {
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const { completion } = useCompletionStore();
+  const { tasks: specTasks, completion: specCompletion } = useSpecificTaskStore();
 
   const months = getMonthsInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
@@ -70,10 +72,14 @@ export default function CalendarMonthView({ plan }: Props) {
                     const isInVacation = dateStr >= plan.startDate && dateStr <= plan.endDate;
                     const day = getDayOfWeek(date);
                     const isWeekend = day === 'sat' || day === 'sun';
-                    const tasks = isInVacation ? (schedule?.[day] ?? []) : [];
-                    const taskCount = tasks.length;
+                    const weeklyTasks = isInVacation ? (schedule?.[day] ?? []) : [];
+                    const specificTasks = isInVacation ? (specTasks[dateStr] ?? []) : [];
+                    const taskCount = weeklyTasks.length + specificTasks.length;
                     const completions = completion[dateStr] ?? [];
-                    const completedCount = tasks.filter((_, idx) => completions[idx] ?? false).length;
+                    const specDone = specCompletion[dateStr] ?? {};
+                    const weeklyDone = weeklyTasks.filter((_, idx) => completions[idx] ?? false).length;
+                    const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
+                    const completedCount = weeklyDone + specDoneCount;
                     const allDone = taskCount > 0 && completedCount === taskCount;
                     const remaining = taskCount - completedCount;
 

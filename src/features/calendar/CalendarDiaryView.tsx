@@ -4,6 +4,7 @@ import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
 import { getDaysInRange, getDayOfWeek, toDateStr } from "../../utils/date";
 import { useCompletionStore } from "../../stores/completionStore";
+import { useSpecificTaskStore } from "../../stores/specificTaskStore";
 
 interface Props {
   plan: VacationPlan;
@@ -21,10 +22,24 @@ function formatNavDate(date: Date): string {
 
 const LINE_H = 28;
 
+function CheckMark({ done }: { done: boolean }) {
+  return (
+    <span className={`shrink-0 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all
+      ${done ? "bg-orange-400 border-orange-400" : "bg-transparent border-gray-300"}`}>
+      {done && (
+        <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+          <path d="M1 3L2.5 4.5L5 1.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 type AnimPhase = "idle" | "exit" | "enter";
 
 export default function CalendarDiaryView({ plan }: Props) {
   const { completion, toggleTask } = useCompletionStore();
+  const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
   const dates = getDaysInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
   const todayStr = toDateStr(new Date());
@@ -83,14 +98,18 @@ export default function CalendarDiaryView({ plan }: Props) {
 
   const date = dates[idx];
   const day = getDayOfWeek(date);
-  const tasks = schedule?.[day] ?? [];
+  const weeklyTasks = schedule?.[day] ?? [];
   const dateStr = toDateStr(date);
   const isToday = dateStr === todayStr;
   const completions = completion[dateStr] ?? [];
-  const completedCount = tasks.filter((_, i) => completions[i] ?? false).length;
-  const allDone = tasks.length > 0 && completedCount === tasks.length;
-  const pct =
-    tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+  const specificTasks = specTasks[dateStr] ?? [];
+  const specDone = specCompletion[dateStr] ?? {};
+  const weeklyDoneCount = weeklyTasks.filter((_, i) => completions[i] ?? false).length;
+  const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
+  const completedCount = weeklyDoneCount + specDoneCount;
+  const totalCount = weeklyTasks.length + specificTasks.length;
+  const allDone = totalCount > 0 && completedCount === totalCount;
+  const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -174,53 +193,42 @@ export default function CalendarDiaryView({ plan }: Props) {
                 backgroundAttachment: "local",
               }}
             >
-              {tasks.length > 0 ? (
+              {totalCount > 0 ? (
                 <ul>
-                  {tasks.map((task, i) => {
+                  {/* 반복 할 일 */}
+                  {weeklyTasks.map((task, i) => {
                     const done = completions[i] ?? false;
                     return (
                       <li
-                        key={i}
-                        onClick={() => toggleTask(dateStr, i, tasks.length)}
+                        key={`w-${i}`}
+                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
                         className="flex items-center gap-2.5 cursor-pointer select-none"
                         style={{ height: `${LINE_H}px` }}
                       >
-                        <span
-                          className={`shrink-0 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all
-                            ${
-                              done
-                                ? "bg-orange-400 border-orange-400"
-                                : "bg-transparent border-gray-300"
-                            }`}
-                        >
-                          {done && (
-                            <svg
-                              width="6"
-                              height="6"
-                              viewBox="0 0 6 6"
-                              fill="none"
-                            >
-                              <path
-                                d="M1 3L2.5 4.5L5 1.5"
-                                stroke="white"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
+                        <CheckMark done={done} />
+                        <span className={`text-sm leading-none transition-colors ${done ? "line-through text-gray-300" : "text-gray-700"}`}>
+                          {task.time && <span className={`font-medium mr-1 ${done ? "text-gray-300" : "text-orange-400"}`}>[{task.time}]</span>}
+                          {task.text}
                         </span>
-                        <span
-                          className={`text-sm leading-none transition-colors
-                            ${done ? "line-through text-gray-300" : "text-gray-700"}`}
-                        >
-                          {task.time && (
-                            <span
-                              className={`font-medium mr-1 ${done ? "text-gray-300" : "text-orange-400"}`}
-                            >
-                              [{task.time}]
-                            </span>
-                          )}
+                      </li>
+                    );
+                  })}
+                  {/* 특별 할 일 */}
+                  {specificTasks.map((task) => {
+                    const done = specDone[task.id] ?? false;
+                    return (
+                      <li
+                        key={`s-${task.id}`}
+                        onClick={() => toggleSpecTask(dateStr, task.id)}
+                        className="flex items-center gap-2.5 cursor-pointer select-none"
+                        style={{ height: `${LINE_H}px` }}
+                      >
+                        <CheckMark done={done} />
+                        <span className={`text-sm leading-none transition-colors
+                          ${done ? "line-through text-gray-300"
+                            : task.important ? "font-semibold text-orange-500"
+                            : "text-gray-700"}`}>
+                          {task.time && <span className={`font-medium mr-1 ${done ? "text-gray-300" : "text-orange-400"}`}>[{task.time}]</span>}
                           {task.text}
                         </span>
                       </li>
@@ -228,17 +236,14 @@ export default function CalendarDiaryView({ plan }: Props) {
                   })}
                 </ul>
               ) : (
-                <div
-                  className="flex items-center italic"
-                  style={{ height: `${LINE_H}px` }}
-                >
+                <div className="flex items-center italic" style={{ height: `${LINE_H}px` }}>
                   <p className="text-sm text-gray-300">할 일이 없는 날이에요</p>
                 </div>
               )}
             </div>
 
             {/* 진행 게이지 */}
-            {tasks.length > 0 && (
+            {totalCount > 0 && (
               <div
                 className={`shrink-0 px-4 py-2 flex items-center gap-2 border-t
                   ${allDone ? "border-orange-100 bg-orange-50" : "border-amber-100 bg-amber-50"}`}
@@ -249,10 +254,8 @@ export default function CalendarDiaryView({ plan }: Props) {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span
-                  className={`text-xs font-medium shrink-0 ${allDone ? "text-orange-400" : "text-gray-400"}`}
-                >
-                  {completedCount}/{tasks.length}
+                <span className={`text-xs font-medium shrink-0 ${allDone ? "text-orange-400" : "text-gray-400"}`}>
+                  {completedCount}/{totalCount}
                 </span>
               </div>
             )}
