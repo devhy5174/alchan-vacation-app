@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { FiList, FiCalendar } from 'react-icons/fi';
+import { FiList, FiCalendar, FiBookOpen } from 'react-icons/fi';
 import { useVacationStore } from '../stores/vacationStore';
 import CalendarListView from '../features/calendar/CalendarListView';
 import CalendarMonthView from '../features/calendar/CalendarMonthView';
+import CalendarDiaryView from '../features/calendar/CalendarDiaryView';
 
-type ViewTab = 'list' | 'month';
+type ViewTab = 'list' | 'month' | 'diary';
 
 const TABS: { key: ViewTab; label: string; icon: typeof FiList }[] = [
-  { key: 'list', label: '리스트 보기', icon: FiList },
-  { key: 'month', label: '달력 보기', icon: FiCalendar },
+  { key: 'list', label: '리스트', icon: FiList },
+  { key: 'month', label: '달력', icon: FiCalendar },
+  { key: 'diary', label: '다이어리', icon: FiBookOpen },
 ];
 
 export default function CalendarPage() {
@@ -26,37 +28,44 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="px-4 py-8 max-w-md mx-auto">
-      <div className="text-center mb-5">
-        <h1 className="text-xl font-bold text-gray-800">{plan.childName}의 방학 캘린더</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          {plan.startDate} ~ {plan.endDate}
-        </p>
+    <div className="max-w-md mx-auto">
+      {/* 고정 헤더: 제목 + 탭 */}
+      <div className="sticky top-0 z-10 bg-orange-50 px-4 pt-8 pb-3 border-b border-orange-100">
+        <div className="text-center mb-4">
+          <h1 className="text-xl font-bold text-gray-800">{plan.childName}의 방학 캘린더</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {plan.startDate} ~ {plan.endDate}
+          </p>
+        </div>
+
+        <div className="flex bg-gray-100 rounded-xl p-1">
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
+                ${activeTab === key
+                  ? 'bg-white text-orange-400 shadow-sm'
+                  : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* 탭 */}
-      <div className="flex bg-gray-100 rounded-xl p-1 mb-5">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActiveTab(key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
-              ${activeTab === key
-                ? 'bg-white text-orange-400 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            <Icon size={14} />
-            {label}
-          </button>
-        ))}
+      {/* 스크롤 콘텐츠 */}
+      <div className="px-4 pt-4 pb-8">
+        {activeTab === 'list' ? (
+          <CalendarListView plan={plan} />
+        ) : activeTab === 'month' ? (
+          <CalendarMonthView plan={plan} />
+        ) : (
+          <CalendarDiaryView plan={plan} />
+        )}
       </div>
-
-      {activeTab === 'list' ? (
-        <CalendarListView plan={plan} />
-      ) : (
-        <CalendarMonthView plan={plan} />
-      )}
     </div>
   );
 }
