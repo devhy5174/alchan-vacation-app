@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { VacationPlan } from '../../types/vacation';
 import { getDayOfWeek, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
@@ -39,6 +39,12 @@ export default function CalendarMonthView({ plan }: Props) {
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const { completion } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion } = useSpecificTaskStore();
+  const todayStr = toDateStr(new Date());
+  const todayRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    todayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
   const months = getMonthsInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
@@ -81,11 +87,15 @@ export default function CalendarMonthView({ plan }: Props) {
                     const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
                     const completedCount = weeklyDone + specDoneCount;
                     const allDone = taskCount > 0 && completedCount === taskCount;
-                    const remaining = taskCount - completedCount;
+                    const isToday = dateStr === todayStr;
+                    const hasImportant = specificTasks.some(
+                      (t) => t.important && !(specDone[t.id] ?? false)
+                    );
 
                     return (
                       <button
                         key={dateStr}
+                        ref={(el) => { if (isToday) todayRef.current = el; }}
                         type="button"
                         disabled={!isInVacation}
                         onClick={() => setSelectedDateStr(dateStr)}
@@ -95,9 +105,19 @@ export default function CalendarMonthView({ plan }: Props) {
                           ${!isInVacation ? 'cursor-default' : 'cursor-pointer'}`}
                       >
                         {allDone ? (
-                          <div className="w-7 h-7 rounded-full bg-orange-400 flex items-center justify-center">
+                          <div className={`w-7 h-7 rounded-full bg-orange-400 flex items-center justify-center
+                            ${isToday ? 'ring-2 ring-offset-1 ring-orange-300' : ''}`}>
                             <span className="text-xs font-bold text-white">{date.getDate()}</span>
                           </div>
+                        ) : isToday ? (
+                          <>
+                            <div className="w-7 h-7 rounded-full border-2 border-orange-400 flex items-center justify-center">
+                              <span className="text-xs font-bold text-orange-500">{date.getDate()}</span>
+                            </div>
+                            {hasImportant && (
+                              <span className="mt-0.5 leading-none text-yellow-400" style={{ fontSize: 11 }}>★</span>
+                            )}
+                          </>
                         ) : (
                           <>
                             <span className={`text-xs font-medium leading-none
@@ -107,10 +127,8 @@ export default function CalendarMonthView({ plan }: Props) {
                             >
                               {date.getDate()}
                             </span>
-                            {taskCount > 0 && (
-                              <span className="text-xs font-semibold text-orange-300 mt-2.5 leading-none">
-                                {remaining}
-                              </span>
+                            {hasImportant && (
+                              <span className="mt-2 leading-none text-yellow-400" style={{ fontSize: 11 }}>★</span>
                             )}
                           </>
                         )}

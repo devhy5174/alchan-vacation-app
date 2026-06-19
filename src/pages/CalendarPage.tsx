@@ -15,7 +15,15 @@ const TABS: { key: ViewTab; label: string; icon: typeof FiList }[] = [
 
 export default function CalendarPage() {
   const plan = useVacationStore((s) => s.plan);
-  const [activeTab, setActiveTab] = useState<ViewTab>('list');
+  const [activeTab, setActiveTab] = useState<ViewTab>(() => {
+    const saved = localStorage.getItem('alchan_calendar_tab');
+    return (saved === 'list' || saved === 'month' || saved === 'diary') ? saved : 'list';
+  });
+
+  function handleTabChange(tab: ViewTab) {
+    setActiveTab(tab);
+    localStorage.setItem('alchan_calendar_tab', tab);
+  }
 
   if (!plan) {
     return (
@@ -43,7 +51,7 @@ export default function CalendarPage() {
             <button
               key={key}
               type="button"
-              onClick={() => setActiveTab(key)}
+              onClick={() => handleTabChange(key)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                 ${activeTab === key
                   ? 'bg-white text-orange-400 shadow-sm'
