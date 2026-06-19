@@ -1,18 +1,30 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiHome, FiCalendar } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiAward } from 'react-icons/fi';
+import type { IconType } from 'react-icons';
+import { useVacationStore } from '../stores/vacationStore';
+import { toDateStr } from '../utils/date';
 
-const NAV_ITEMS = [
+type NavItem = { label: string; icon: IconType; path: string };
+
+const BASE_NAV: NavItem[] = [
   { label: '홈', icon: FiHome, path: '/' },
   { label: '캘린더', icon: FiCalendar, path: '/calendar' },
-] as const;
+];
+
+const RESULT_NAV: NavItem = { label: '결과', icon: FiAward, path: '/result' };
 
 export default function BottomNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
+  const plan = useVacationStore((s) => s.plan);
+
+  // 종료일 다음날부터 결과 탭 활성화
+  const showResult = plan ? toDateStr(new Date()) > plan.endDate : false;
+  const navItems = showResult ? [...BASE_NAV, RESULT_NAV] : BASE_NAV;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex safe-area-bottom">
-      {NAV_ITEMS.map(({ label, icon: Icon, path }) => {
+      {navItems.map(({ label, icon: Icon, path }) => {
         const active = location.pathname === path;
         return (
           <button

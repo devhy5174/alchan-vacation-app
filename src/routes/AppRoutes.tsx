@@ -2,12 +2,20 @@ import { useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import CalendarPage from '../pages/CalendarPage';
+import ResultPage from '../pages/ResultPage';
 import BottomNavigation from '../components/BottomNavigation';
 import { useVacationStore } from '../stores/vacationStore';
+import { useAutoSaveResult } from '../hooks/useAutoSaveResult';
+
+function AutoSaver() {
+  useAutoSaveResult();
+  return null;
+}
 
 function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-orange-50 pb-20">
+      <AutoSaver />
       {children}
       <BottomNavigation />
     </div>
@@ -35,6 +43,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Layout><HomePage /></Layout>} />
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
+        <Route path="/result" element={<Layout><ResultPage /></Layout>} />
       </Routes>
     </BrowserRouter>
   );

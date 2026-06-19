@@ -1,6 +1,7 @@
 export const VACATION_KEY = 'alchan_vacation_plan';
 export const COMPLETION_KEY = 'alchan_completion';
 export const MEMO_KEY = 'alchan_memo';
+export const HISTORY_KEY = 'alchan_history';
 
 export function loadFromStorage<T>(key: string): T | null {
   try {
