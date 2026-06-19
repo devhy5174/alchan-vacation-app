@@ -64,7 +64,7 @@ export default function CalendarMonthView({ plan }: Props) {
                 {/* 날짜 그리드 */}
                 <div className="grid grid-cols-7">
                   {grid.map((date, i) => {
-                    if (!date) return <div key={`empty-${i}`} className="min-h-[48px]" />;
+                    if (!date) return <div key={`empty-${i}`} className="h-14" />;
 
                     const dateStr = toDateStr(date);
                     const isInVacation = dateStr >= plan.startDate && dateStr <= plan.endDate;
@@ -73,7 +73,9 @@ export default function CalendarMonthView({ plan }: Props) {
                     const tasks = isInVacation ? (schedule?.[day] ?? []) : [];
                     const taskCount = tasks.length;
                     const completions = completion[dateStr] ?? [];
-                    const allDone = taskCount > 0 && tasks.every((_, idx) => completions[idx] ?? false);
+                    const completedCount = tasks.filter((_, idx) => completions[idx] ?? false).length;
+                    const allDone = taskCount > 0 && completedCount === taskCount;
+                    const remaining = taskCount - completedCount;
 
                     return (
                       <button
@@ -81,21 +83,30 @@ export default function CalendarMonthView({ plan }: Props) {
                         type="button"
                         disabled={!isInVacation}
                         onClick={() => setSelectedDateStr(dateStr)}
-                        className={`flex flex-col items-center justify-center min-h-[48px] transition-colors
-                          ${isInVacation ? 'cursor-pointer hover:bg-orange-50' : 'cursor-default'}`}
+                        className={`h-14 flex flex-col items-center justify-start pt-1.5 transition-colors
+                          ${allDone ? 'bg-orange-50' : ''}
+                          ${isInVacation && !allDone ? 'hover:bg-orange-50 cursor-pointer' : ''}
+                          ${!isInVacation ? 'cursor-default' : 'cursor-pointer'}`}
                       >
                         {allDone ? (
                           <div className="w-7 h-7 rounded-full bg-orange-400 flex items-center justify-center">
                             <span className="text-xs font-bold text-white">{date.getDate()}</span>
                           </div>
                         ) : (
-                          <span className={`text-xs font-medium
-                            ${isWeekend && isInVacation ? 'text-orange-400' : ''}
-                            ${!isWeekend && isInVacation ? 'text-gray-700' : ''}
-                            ${!isInVacation ? 'text-gray-300' : ''}`}
-                          >
-                            {date.getDate()}
-                          </span>
+                          <>
+                            <span className={`text-xs font-medium leading-none
+                              ${isWeekend && isInVacation ? 'text-orange-400' : ''}
+                              ${!isWeekend && isInVacation ? 'text-gray-700' : ''}
+                              ${!isInVacation ? 'text-gray-300' : ''}`}
+                            >
+                              {date.getDate()}
+                            </span>
+                            {taskCount > 0 && (
+                              <span className="text-xs font-semibold text-orange-300 mt-2.5 leading-none">
+                                {remaining}
+                              </span>
+                            )}
+                          </>
                         )}
                       </button>
                     );
