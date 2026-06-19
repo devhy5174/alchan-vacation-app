@@ -63,10 +63,12 @@ src/
 │   │   ├─ VacationPreviewCard.tsx
 │   │   ├─ WeeklyScheduleForm.tsx
 │   │   ├─ DayScheduleEditor.tsx
-│   │   └─ RepeatTaskAdder.tsx
+│   │   ├─ RepeatTaskAdder.tsx
+│   │   └─ SpecificDateTaskForm.tsx
 │   ├─ calendar/
 │   │   ├─ CalendarListView.tsx
 │   │   ├─ CalendarMonthView.tsx
+│   │   ├─ CalendarDiaryView.tsx
 │   │   └─ DayDetailModal.tsx
 │   └─ memo/
 │       └─ MemoSection.tsx
@@ -74,10 +76,12 @@ src/
 │   └─ AppRoutes.tsx
 ├─ stores/
 │   ├─ vacationStore.ts
-│   └─ completionStore.ts
+│   ├─ completionStore.ts
+│   └─ specificTaskStore.ts
 ├─ types/
 │   ├─ vacation.ts
-│   └─ completion.ts
+│   ├─ completion.ts
+│   └─ specificTask.ts
 └─ utils/
     ├─ date.ts
     └─ localStorage.ts
@@ -96,11 +100,16 @@ src/
 - 반복 할 일 여러 요일에 한 번에 추가
 - Zustand + LocalStorage 상태 저장
 - 저장 내용 미리보기 카드
-- 캘린더 만들기: 리스트 보기 + 달력 보기 탭
+- 캘린더: 리스트 보기 + 달력 보기 + 다이어리 보기 탭
 - 날짜별 할 일 완료 체크 (게이지 + 달성 시각화)
 - 오늘 날짜 자동 스크롤 및 강조 표시
 - 자유 메모 (LocalStorage 자동 저장)
 - 앱 진입 시 캘린더 자동 이동 (데이터 있을 때)
+- 특별 할 일: 특정 날짜 1회성 일정 추가 / 수정 / 삭제 (중요 표기 포함)
+- 홈 할 일 카드: 반복 할 일 / 특별 할 일 탭 분리
+- 다이어리 보기: 날짜별 페이지 플립 UX, 스와이프 제스처 지원
+- 달력 보기: 오늘 날짜 원형 표시 및 자동 스크롤, 중요 일정 ★ 표기
+- 캘린더 탭 선택 상태 유지 (마지막 탭 복원)
 
 ### 현재 구현하지 않는 기능
 
