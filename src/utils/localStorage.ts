@@ -4,6 +4,7 @@ export const MEMO_KEY = 'alchan_memo';
 export const HISTORY_KEY = 'alchan_history';
 export const SPECIFIC_TASKS_KEY = 'alchan_specific_tasks';
 export const SPECIFIC_COMPLETION_KEY = 'alchan_specific_completion';
+export const REWARD_KEY = 'alchan_reward';
 
 export function loadFromStorage<T>(key: string): T | null {
   try {

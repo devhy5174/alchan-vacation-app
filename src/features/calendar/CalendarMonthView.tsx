@@ -3,6 +3,8 @@ import type { VacationPlan } from '../../types/vacation';
 import { getDayOfWeek, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
 import { useSpecificTaskStore } from '../../stores/specificTaskStore';
+import { calcStreakPerDay } from '../../utils/streak';
+import StreakBanner from '../reward/StreakBanner';
 import DayDetailModal from './DayDetailModal';
 
 interface Props {
@@ -10,6 +12,16 @@ interface Props {
 }
 
 const WEEK_HEADERS = ['월', '화', '수', '목', '금', '토', '일'] as const;
+
+// 테마 해금 마일스톤 달성일 표시 (컬러 닷)
+const MILESTONE_STREAKS: Record<number, React.ReactNode> = {
+  5:  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'linear-gradient(135deg,#f87171,#facc15,#4ade80,#60a5fa,#a78bfa)' }} />,
+  7:  <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#0ea5e9' }} />,
+  14: <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#ec4899' }} />,
+  21: <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#10b981' }} />,
+};
+
+const MILESTONE_SET = new Set([5, 7, 14, 21]);
 
 function getMonthsInRange(startDate: string, endDate: string): Array<{ year: number; month: number }> {
   const start = new Date(startDate);
@@ -49,9 +61,14 @@ export default function CalendarMonthView({ plan }: Props) {
   const months = getMonthsInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
 
+  const streakPerDay = calcStreakPerDay(plan, completion, specTasks, specCompletion);
+
   return (
     <>
       <div className="flex flex-col gap-6">
+        {/* 연속 달성 배너 */}
+        <StreakBanner />
+
         {months.map(({ year, month }) => {
           const grid = buildMonthGrid(year, month);
 
@@ -92,6 +109,11 @@ export default function CalendarMonthView({ plan }: Props) {
                       (t) => t.important && !(specDone[t.id] ?? false)
                     );
 
+                    const streakCount = streakPerDay[dateStr] ?? 0;
+                    const milestoneIcon = MILESTONE_SET.has(streakCount)
+                      ? MILESTONE_STREAKS[streakCount]
+                      : null;
+
                     return (
                       <button
                         key={dateStr}
@@ -105,10 +127,17 @@ export default function CalendarMonthView({ plan }: Props) {
                           ${!isInVacation ? 'cursor-default' : 'cursor-pointer'}`}
                       >
                         {allDone ? (
-                          <div className={`w-7 h-7 rounded-full bg-orange-400 flex items-center justify-center
-                            ${isToday ? 'ring-2 ring-offset-1 ring-orange-300' : ''}`}>
-                            <span className="text-xs font-bold text-white">{date.getDate()}</span>
-                          </div>
+                          <>
+                            <div className={`w-7 h-7 rounded-full bg-orange-400 flex items-center justify-center
+                              ${isToday ? 'ring-2 ring-offset-1 ring-orange-300' : ''}`}>
+                              <span className="text-xs font-bold text-white">{date.getDate()}</span>
+                            </div>
+                            {milestoneIcon && (
+                              <div className="mt-0.5 flex items-center justify-center">
+                                {milestoneIcon}
+                              </div>
+                            )}
+                          </>
                         ) : isToday ? (
                           <>
                             <div className="w-7 h-7 rounded-full border-2 border-orange-400 flex items-center justify-center">
@@ -127,8 +156,13 @@ export default function CalendarMonthView({ plan }: Props) {
                             >
                               {date.getDate()}
                             </span>
-                            {hasImportant && (
+                            {hasImportant && !milestoneIcon && (
                               <span className="mt-2 leading-none text-yellow-400" style={{ fontSize: 11 }}>★</span>
+                            )}
+                            {milestoneIcon && (
+                              <div className="mt-1 flex items-center justify-center">
+                                {milestoneIcon}
+                              </div>
                             )}
                           </>
                         )}
@@ -144,7 +178,6 @@ export default function CalendarMonthView({ plan }: Props) {
         <p className="text-center text-xs text-gray-300 pb-2">날짜를 클릭하면 할 일을 확인할 수 있어요</p>
       </div>
 
-      {/* 날짜 상세 팝업 */}
       {selectedDateStr && (
         <DayDetailModal
           dateStr={selectedDateStr}

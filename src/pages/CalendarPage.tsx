@@ -38,7 +38,7 @@ export default function CalendarPage() {
   return (
     <div className="max-w-md mx-auto">
       {/* 고정 헤더: 제목 + 탭 */}
-      <div className="sticky top-0 z-10 bg-orange-50 px-4 pt-8 pb-3 border-b border-orange-100">
+      <div className="sticky top-0 z-20 bg-orange-50 px-4 pt-8 pb-3 border-b border-orange-100">
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold text-gray-800">{plan.childName}의 방학 캘린더</h1>
           <p className="text-sm text-gray-400 mt-1">

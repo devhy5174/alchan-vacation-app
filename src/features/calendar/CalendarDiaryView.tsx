@@ -5,6 +5,18 @@ import { DAY_LABELS } from "../../types/vacation";
 import { getDaysInRange, getDayOfWeek, toDateStr } from "../../utils/date";
 import { useCompletionStore } from "../../stores/completionStore";
 import { useSpecificTaskStore } from "../../stores/specificTaskStore";
+import { useRewardStore } from "../../stores/rewardStore";
+import { THEME_COLORS } from "../reward/diaryTheme";
+import type { DiaryTheme } from "../../types/reward";
+import { useStreak } from "../../hooks/useStreak";
+
+const MINI_THEMES: { id: DiaryTheme; color: string; gradient?: string; ringColor: string }[] = [
+  { id: 'orange', color: '#fb923c', ringColor: '#fb923c' },
+  { id: 'blue', color: '#0ea5e9', ringColor: '#0ea5e9' },
+  { id: 'pink', color: '#ec4899', ringColor: '#ec4899' },
+  { id: 'mint', color: '#10b981', ringColor: '#10b981' },
+  { id: 'rainbow', gradient: 'linear-gradient(135deg, #f87171, #fb923c, #facc15, #4ade80, #60a5fa, #a78bfa)', color: '#a855f7', ringColor: '#a78bfa' },
+];
 
 interface Props {
   plan: VacationPlan;
@@ -24,32 +36,39 @@ const LINE_H = 28;
 const CONTENT_LEFT = 20;
 const RING_COUNT = 13;
 
-function SpiralRing({ isToday }: { isToday: boolean }) {
-  const front = isToday ? "#fb923c" : "#9ca3af";
-  const back = isToday ? "#fed7aa" : "#e5e7eb";
+function SpiralRing({ front, back }: { front: string; back: string }) {
   return (
-    <svg width="22" height="20" viewBox="0 0 22 20" fill="none"
+    <svg
+      width="22"
+      height="20"
+      viewBox="0 0 22 20"
+      fill="none"
       style={{ filter: "drop-shadow(0px 1px 1.5px rgba(0,0,0,0.22))" }}
     >
-      {/* 종이 뒤로 들어가는 부분 (오른쪽 호, 연함) */}
-      <path d="M11 1.5 A9 8 0 0 1 11 18.5"
-        stroke={back} strokeWidth="3.2" strokeLinecap="round" />
-      {/* 종이 앞으로 나오는 부분 (왼쪽 호, 진함) */}
-      <path d="M11 1.5 A9 8 0 0 0 11 18.5"
-        stroke={front} strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M11 1.5 A9 8 0 0 1 11 18.5" stroke={back} strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M11 1.5 A9 8 0 0 0 11 18.5" stroke={front} strokeWidth="3.2" strokeLinecap="round" />
     </svg>
   );
 }
 
-function CheckMark({ done }: { done: boolean }) {
+function CheckMark({ done, doneColor }: { done: boolean; doneColor: string }) {
   return (
     <span
-      className={`shrink-0 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all
-        ${done ? "bg-orange-400 border-orange-400" : "bg-transparent border-gray-300"}`}
+      className="shrink-0 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all"
+      style={{
+        backgroundColor: done ? doneColor : "transparent",
+        borderColor: done ? doneColor : "#d1d5db",
+      }}
     >
       {done && (
         <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
-          <path d="M1 3L2.5 4.5L5 1.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M1 3L2.5 4.5L5 1.5"
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       )}
     </span>
@@ -61,6 +80,14 @@ type AnimPhase = "idle" | "exit" | "enter";
 export default function CalendarDiaryView({ plan }: Props) {
   const { completion, toggleTask } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
+  const selectedTheme = useRewardStore((s) => s.selectedTheme);
+  const unlockedThemes = useRewardStore((s) => s.unlockedThemes);
+  const setTheme = useRewardStore((s) => s.setTheme);
+  const colors = THEME_COLORS[selectedTheme];
+
+  // 보상 체크 (다이어리에서 할 일 체크 시 즉시 반영)
+  useStreak();
+
   const dates = getDaysInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
   const todayStr = toDateStr(new Date());
@@ -132,14 +159,31 @@ export default function CalendarDiaryView({ plan }: Props) {
   const allDone = totalCount > 0 && completedCount === totalCount;
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  const accentColor = colors.todayBadgeBg;
+
   const notebookBg = {
-    backgroundColor: "#f8faff",
-    backgroundImage: `
-      repeating-linear-gradient(transparent, transparent 27px, #bfdbfe 27px, #bfdbfe 28px)
-    `,
-    backgroundPosition: "0 0, 0 0",
+    backgroundColor: colors.notebookBg,
+    backgroundImage: `repeating-linear-gradient(transparent, transparent 27px, ${colors.lines} 27px, ${colors.lines} 28px)`,
     backgroundAttachment: "local" as const,
   };
+
+  const todayBadgeStyle =
+    colors.isRainbow && isToday
+      ? {
+          background:
+            "linear-gradient(90deg, #f87171, #fb923c, #facc15, #4ade80, #60a5fa, #a78bfa)",
+          boxShadow: "1px 2px 5px rgba(0,0,0,0.15)",
+          transform: "rotate(-1.2deg)",
+        }
+      : {
+          backgroundColor: isToday ? colors.todayBadgeBg : colors.otherBadgeBg,
+          boxShadow: "1px 2px 5px rgba(0,0,0,0.15)",
+          transform: "rotate(-1.2deg)",
+        };
+
+  const cardBoxShadow = isToday
+    ? `0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06), 0 0 0 2px white, 0 0 0 4px ${colors.ringToday}`
+    : "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
 
   return (
     <div className="flex flex-col gap-4">
@@ -184,152 +228,202 @@ export default function CalendarDiaryView({ plan }: Props) {
       `}</style>
 
       {/* 페이지 (스와이프 영역) */}
-      <div
-        className="overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className="overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div key={idx} className={pageClass} onAnimationEnd={onAnimEnd}>
-          {/* 스프링 + 카드 wrapper */}
           <div className="relative" style={{ paddingLeft: "14px" }}>
-            {/* 스프링 링 컬럼 */}
+            {/* 스프링 링 */}
             <div
               className="absolute top-0 bottom-0 flex flex-col justify-evenly items-center py-3 z-10 pointer-events-none"
               style={{ left: "3px", width: "22px" }}
             >
               {Array.from({ length: RING_COUNT }).map((_, i) => (
-                <SpiralRing key={i} isToday={isToday} />
+                <SpiralRing
+                  key={i}
+                  front={isToday ? colors.ringTodayFront : colors.ringOtherFront}
+                  back={isToday ? colors.ringTodayBack : colors.ringOtherBack}
+                />
               ))}
             </div>
 
-          <div
-            className={`flex flex-col rounded-2xl overflow-hidden shadow-md border
-              ${isToday ? "border-sky-300 ring-2 ring-sky-200 ring-offset-1" : "border-sky-200"}`}
-            style={{ height: "clamp(200px, calc(100svh - 330px), 480px)" }}
-          >
-            {/* 줄노트 본문 */}
+            {/* 노트 카드 */}
             <div
-              className="flex-1 min-h-0 overflow-y-auto"
-              style={notebookBg}
+              className="flex flex-col rounded-2xl overflow-hidden"
+              style={{
+                height: "clamp(200px, calc(100svh - 330px), 480px)",
+                border: `1.5px solid ${isToday ? colors.borderToday : colors.borderOther}`,
+                boxShadow: cardBoxShadow,
+              }}
             >
-              {/* 날짜 스티커 (첫 번째 줄 영역) */}
-              <div
-                className="flex items-center"
-                style={{
-                  height: `${LINE_H + 8}px`,
-                  paddingLeft: `${CONTENT_LEFT}px`,
-                  paddingTop: "6px",
-                }}
-              >
+              {/* 줄노트 본문 */}
+              <div className="flex-1 min-h-0 overflow-y-auto" style={notebookBg}>
+                {/* 날짜 스티커 + 테마 서클 */}
                 <div
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold shadow
-                    ${isToday ? "bg-orange-400 text-white" : "bg-sky-400 text-white"}`}
+                  className="flex items-center justify-between"
                   style={{
-                    transform: "rotate(-1.2deg)",
-                    boxShadow: "1px 2px 5px rgba(0,0,0,0.15)",
+                    height: `${LINE_H + 8}px`,
+                    paddingLeft: `${CONTENT_LEFT}px`,
+                    paddingRight: "10px",
+                    paddingTop: "6px",
                   }}
                 >
-                  <FiBookOpen size={10} />
-                  {formatDiaryDate(date)}
-                  {isToday && (
-                    <span className="bg-white text-orange-400 text-[9px] px-1 rounded font-bold leading-4">
-                      오늘
-                    </span>
-                  )}
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold text-white"
+                    style={todayBadgeStyle}
+                  >
+                    <FiBookOpen size={10} />
+                    {formatDiaryDate(date)}
+                    {isToday && (
+                      <span
+                        className="bg-white text-[9px] px-1 rounded font-bold leading-4"
+                        style={{ color: accentColor }}
+                      >
+                        오늘
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 미니 테마 서클 */}
+                  <div className="flex items-center gap-1">
+                    {MINI_THEMES.map(({ id, color, gradient, ringColor }) => {
+                      const unlocked = unlockedThemes.includes(id);
+                      const selected = selectedTheme === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => unlocked && setTheme(id)}
+                          className="rounded-full transition-transform active:scale-90"
+                          style={{
+                            width: 12,
+                            height: 12,
+                            background: gradient || color,
+                            filter: unlocked ? 'none' : 'grayscale(100%) opacity(0.3)',
+                            boxShadow: selected ? `0 0 0 1.5px white, 0 0 0 3px ${ringColor}` : 'none',
+                            cursor: unlocked ? 'pointer' : 'default',
+                            border: 'none',
+                            padding: 0,
+                            flexShrink: 0,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {/* 할 일 목록 */}
+                {totalCount > 0 ? (
+                  <ul>
+                    {weeklyTasks.map((task, i) => {
+                      const done = completions[i] ?? false;
+                      return (
+                        <li
+                          key={`w-${i}`}
+                          onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
+                          className="flex items-center cursor-pointer select-none"
+                          style={{
+                            height: `${LINE_H}px`,
+                            paddingLeft: `${CONTENT_LEFT}px`,
+                            paddingRight: "12px",
+                          }}
+                        >
+                          <CheckMark done={done} doneColor={colors.checkDone} />
+                          <span className={`text-sm leading-none ml-2 ${done ? "hand-strike" : "text-gray-700"}`}>
+                            {task.time && (
+                              <span
+                                className="font-medium mr-1"
+                                style={{ color: done ? undefined : accentColor }}
+                              >
+                                [{task.time}]
+                              </span>
+                            )}
+                            {task.text}
+                          </span>
+                        </li>
+                      );
+                    })}
+                    {specificTasks.map((task) => {
+                      const done = specDone[task.id] ?? false;
+                      return (
+                        <li
+                          key={`s-${task.id}`}
+                          onClick={() => toggleSpecTask(dateStr, task.id)}
+                          className="flex items-center cursor-pointer select-none"
+                          style={{
+                            height: `${LINE_H}px`,
+                            paddingLeft: `${CONTENT_LEFT}px`,
+                            paddingRight: "12px",
+                          }}
+                        >
+                          <CheckMark done={done} doneColor={colors.checkDone} />
+                          <span
+                            className={`text-sm leading-none ml-2 ${done ? "hand-strike" : ""}`}
+                            style={
+                              !done
+                                ? {
+                                    color: task.important ? accentColor : "#374151",
+                                    fontWeight: task.important ? 600 : undefined,
+                                  }
+                                : undefined
+                            }
+                          >
+                            {task.time && (
+                              <span
+                                className="font-medium mr-1"
+                                style={{ color: done ? undefined : accentColor }}
+                              >
+                                [{task.time}]
+                              </span>
+                            )}
+                            {task.text}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <div
+                    className="flex items-center italic"
+                    style={{ height: `${LINE_H}px`, paddingLeft: `${CONTENT_LEFT}px` }}
+                  >
+                    <p className="text-sm text-gray-300">할 일이 없는 날이에요</p>
+                  </div>
+                )}
               </div>
 
-              {/* 할 일 목록 */}
-              {totalCount > 0 ? (
-                <ul>
-                  {weeklyTasks.map((task, i) => {
-                    const done = completions[i] ?? false;
-                    return (
-                      <li
-                        key={`w-${i}`}
-                        onClick={() => toggleTask(dateStr, i, weeklyTasks.length)}
-                        className="flex items-center cursor-pointer select-none"
-                        style={{
-                          height: `${LINE_H}px`,
-                          paddingLeft: `${CONTENT_LEFT}px`,
-                          paddingRight: "12px",
-                        }}
-                      >
-                        <CheckMark done={done} />
-                        <span className={`text-sm leading-none ml-2 ${done ? "hand-strike" : "text-gray-700"}`}>
-                          {task.time && (
-                            <span className={`font-medium mr-1 ${done ? "" : "text-orange-400"}`}>
-                              [{task.time}]
-                            </span>
-                          )}
-                          {task.text}
-                        </span>
-                      </li>
-                    );
-                  })}
-                  {specificTasks.map((task) => {
-                    const done = specDone[task.id] ?? false;
-                    return (
-                      <li
-                        key={`s-${task.id}`}
-                        onClick={() => toggleSpecTask(dateStr, task.id)}
-                        className="flex items-center cursor-pointer select-none"
-                        style={{
-                          height: `${LINE_H}px`,
-                          paddingLeft: `${CONTENT_LEFT}px`,
-                          paddingRight: "12px",
-                        }}
-                      >
-                        <CheckMark done={done} />
-                        <span
-                          className={`text-sm leading-none ml-2
-                            ${done
-                              ? "hand-strike"
-                              : task.important
-                                ? "font-semibold text-orange-500"
-                                : "text-gray-700"
-                            }`}
-                        >
-                          {task.time && (
-                            <span className={`font-medium mr-1 ${done ? "" : "text-orange-400"}`}>
-                              [{task.time}]
-                            </span>
-                          )}
-                          {task.text}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
+              {/* 진행 게이지 */}
+              {totalCount > 0 && (
                 <div
-                  className="flex items-center italic"
-                  style={{ height: `${LINE_H}px`, paddingLeft: `${CONTENT_LEFT}px` }}
+                  className="shrink-0 px-4 py-2 flex items-center gap-2 border-t"
+                  style={{
+                    borderTopColor: colors.borderOther,
+                    backgroundColor: allDone ? colors.gaugeDoneBarBg : colors.gaugeBarBg,
+                  }}
                 >
-                  <p className="text-sm text-gray-300">할 일이 없는 날이에요</p>
+                  <div
+                    className="flex-1 h-1.5 rounded-full overflow-hidden"
+                    style={{ backgroundColor: colors.gaugeBg }}
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${pct}%`,
+                        ...(allDone && colors.isRainbow
+                          ? { background: 'linear-gradient(90deg, #f87171, #fb923c, #facc15, #4ade80, #60a5fa, #a78bfa)' }
+                          : { backgroundColor: allDone ? colors.gaugeDoneFill : colors.gaugeFill }
+                        ),
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="text-xs font-medium shrink-0"
+                    style={{ color: allDone && colors.isRainbow ? '#a855f7' : allDone ? colors.gaugeDoneFill : colors.gaugeFill }}
+                  >
+                    {completedCount}/{totalCount}
+                  </span>
                 </div>
               )}
             </div>
-
-            {/* 진행 게이지 */}
-            {totalCount > 0 && (
-              <div
-                className="shrink-0 px-4 py-2 flex items-center gap-2 border-t border-sky-100"
-                style={{ backgroundColor: allDone ? "#ecfdf5" : "#f0f7ff" }}
-              >
-                <div className="flex-1 h-1.5 bg-sky-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${allDone ? "bg-emerald-400" : "bg-sky-400"}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className={`text-xs font-medium shrink-0 ${allDone ? "text-emerald-500" : "text-sky-400"}`}>
-                  {completedCount}/{totalCount}
-                </span>
-              </div>
-            )}
           </div>
-          </div>{/* 스프링 wrapper 닫기 */}
         </div>
       </div>
 
@@ -342,8 +436,7 @@ export default function CalendarDiaryView({ plan }: Props) {
           className={`flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium transition-colors
             ${idx === 0 || phase !== "idle"
               ? "text-gray-200 cursor-not-allowed"
-              : "text-gray-500 hover:bg-gray-100 cursor-pointer"
-            }`}
+              : "text-gray-500 hover:bg-gray-100 cursor-pointer"}`}
         >
           <FiChevronLeft size={16} />
           {idx > 0 ? formatNavDate(dates[idx - 1]) : "이전"}
@@ -374,13 +467,13 @@ export default function CalendarDiaryView({ plan }: Props) {
           className={`flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium transition-colors
             ${idx === dates.length - 1 || phase !== "idle"
               ? "text-gray-200 cursor-not-allowed"
-              : "text-gray-500 hover:bg-gray-100 cursor-pointer"
-            }`}
+              : "text-gray-500 hover:bg-gray-100 cursor-pointer"}`}
         >
           {idx < dates.length - 1 ? formatNavDate(dates[idx + 1]) : "다음"}
           <FiChevronRight size={16} />
         </button>
       </div>
+
     </div>
   );
 }
