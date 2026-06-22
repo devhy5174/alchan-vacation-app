@@ -1,29 +1,75 @@
 import { useState } from "react";
-import { FiChevronDown, FiChevronUp, FiRepeat, FiStar, FiMapPin } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiChevronDown, FiChevronUp, FiRepeat, FiStar, FiMapPin, FiLock, FiUnlock } from "react-icons/fi";
 import VacationForm from "../features/vacation/VacationForm";
 import VacationPreviewCard from "../features/vacation/VacationPreviewCard";
 import WeeklyScheduleForm from "../features/vacation/WeeklyScheduleForm";
 import SpecificDateTaskForm from "../features/vacation/SpecificDateTaskForm";
 import MemoSection from "../features/memo/MemoSection";
+import PinLockScreen from "../components/PinLockScreen";
+import PinSetupModal from "../components/PinSetupModal";
 import { useVacationStore } from "../stores/vacationStore";
 
 type TaskTab = "repeat" | "specific";
 
 const INTRO_KEY = 'alchan_intro_shown';
+const PIN_KEY = 'alchan_pin';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const plan = useVacationStore((s) => s.plan);
   const [formOpen, setFormOpen] = useState(!plan);
   const [taskTab, setTaskTab] = useState<TaskTab>("repeat");
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem(INTRO_KEY));
+
+  const storedPin = localStorage.getItem(PIN_KEY);
+  // 홈에 올 때마다 잠금 — 캘린더로 이동 시 컴포넌트 언마운트되어 자동 초기화
+  const [unlocked, setUnlocked] = useState(false);
+  const isLocked = !!storedPin && !unlocked;
+
+  const [showPinSetup, setShowPinSetup] = useState(false);
 
   function closeIntro() {
     localStorage.setItem(INTRO_KEY, '1');
     setShowIntro(false);
   }
 
+  function handleUnlock() {
+    setUnlocked(true);
+  }
+
+  function handlePinSave(pin: string) {
+    localStorage.setItem(PIN_KEY, pin);
+    setUnlocked(false); // 저장 즉시 잠금
+    setShowPinSetup(false);
+  }
+
+  function handlePinRemove() {
+    localStorage.removeItem(PIN_KEY);
+    setShowPinSetup(false);
+  }
+
+  if (isLocked) {
+    return (
+      <PinLockScreen
+        storedPin={storedPin!}
+        onUnlock={handleUnlock}
+        onGoToCalendar={() => navigate('/calendar')}
+      />
+    );
+  }
+
   return (
     <div className="px-4 py-8">
+      {showPinSetup && (
+        <PinSetupModal
+          hasPin={!!localStorage.getItem(PIN_KEY)}
+          onSave={handlePinSave}
+          onRemove={handlePinRemove}
+          onClose={() => setShowPinSetup(false)}
+        />
+      )}
+
       {showIntro && (
         <>
           <div className="fixed inset-0 bg-black/40 z-50" onClick={closeIntro} />
@@ -60,11 +106,22 @@ export default function HomePage() {
         </>
       )}
       <div className="max-w-md mx-auto flex flex-col gap-5">
-        <div className="text-center mb-2">
+        <div className="relative text-center mb-2">
           <h1 className="text-2xl font-bold text-gray-800">알찬방학</h1>
           <p className="text-sm text-gray-400">
             아이의 방학 계획을 함께 만들어요
           </p>
+          <button
+            type="button"
+            onClick={() => setShowPinSetup(true)}
+            title={storedPin ? '잠금 설정 변경' : '잠금 설정'}
+            className={`absolute right-0 top-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer
+              ${storedPin
+                ? 'bg-orange-100 text-orange-400 hover:bg-orange-200'
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+          >
+            {storedPin ? <FiLock size={15} /> : <FiUnlock size={15} />}
+          </button>
         </div>
 
         {plan && <VacationPreviewCard />}
