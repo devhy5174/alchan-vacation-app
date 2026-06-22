@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiChevronDown, FiChevronUp, FiRepeat, FiStar, FiMapPin, FiLock, FiUnlock } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiRepeat, FiStar, FiMapPin, FiLock, FiUnlock, FiGift } from "react-icons/fi";
 import VacationForm from "../features/vacation/VacationForm";
 import VacationPreviewCard from "../features/vacation/VacationPreviewCard";
 import WeeklyScheduleForm from "../features/vacation/WeeklyScheduleForm";
@@ -8,9 +8,10 @@ import SpecificDateTaskForm from "../features/vacation/SpecificDateTaskForm";
 import MemoSection from "../features/memo/MemoSection";
 import PinLockScreen from "../components/PinLockScreen";
 import PinSetupModal from "../components/PinSetupModal";
+import ParentRewardSection from "../features/reward/ParentRewardSection";
 import { useVacationStore } from "../stores/vacationStore";
 
-type TaskTab = "repeat" | "specific";
+type TaskTab = "repeat" | "specific" | "reward";
 
 const INTRO_KEY = 'alchan_intro_shown';
 const PIN_KEY = 'alchan_pin';
@@ -161,11 +162,7 @@ export default function HomePage() {
                   type="button"
                   onClick={() => setTaskTab("repeat")}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors cursor-pointer
-                    ${
-                      taskTab === "repeat"
-                        ? "text-orange-400 border-b-2 border-orange-400"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}
+                    ${taskTab === "repeat" ? "text-orange-400 border-b-2 border-orange-400" : "text-gray-400 hover:text-gray-600"}`}
                 >
                   <FiRepeat size={13} />
                   반복 할 일
@@ -174,14 +171,19 @@ export default function HomePage() {
                   type="button"
                   onClick={() => setTaskTab("specific")}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors cursor-pointer
-                    ${
-                      taskTab === "specific"
-                        ? "text-orange-400 border-b-2 border-orange-400"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}
+                    ${taskTab === "specific" ? "text-orange-400 border-b-2 border-orange-400" : "text-gray-400 hover:text-gray-600"}`}
                 >
                   <FiStar size={13} />
                   특별 할 일
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskTab("reward")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors cursor-pointer
+                    ${taskTab === "reward" ? "text-orange-400 border-b-2 border-orange-400" : "text-gray-400 hover:text-gray-600"}`}
+                >
+                  <FiGift size={13} />
+                  응원
                 </button>
               </div>
 
@@ -189,8 +191,10 @@ export default function HomePage() {
               <div className="p-5">
                 {taskTab === "repeat" ? (
                   <WeeklyScheduleForm />
-                ) : (
+                ) : taskTab === "specific" ? (
                   <SpecificDateTaskForm />
+                ) : (
+                  <ParentRewardSection plan={plan} />
                 )}
               </div>
             </div>

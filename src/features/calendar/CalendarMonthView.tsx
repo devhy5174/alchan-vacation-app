@@ -4,7 +4,6 @@ import type { VacationPlan } from '../../types/vacation';
 import { getDayOfWeek, toDateStr } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
 import { useSpecificTaskStore } from '../../stores/specificTaskStore';
-import { calcMilestonePositions } from '../../utils/streak';
 import StreakBanner from '../reward/StreakBanner';
 import DayDetailModal from './DayDetailModal';
 
@@ -15,12 +14,12 @@ interface Props {
 const WEEK_HEADERS = ['월', '화', '수', '목', '금', '토', '일'] as const;
 
 const MILESTONE_INFO: Record<number, { label: string; color: string }> = {
-  7:  { label: '스카이블루', color: '#0ea5e9' },
-  14: { label: '핑크 노트',  color: '#ec4899' },
-  21: { label: '민트 노트',  color: '#10b981' },
-  30: { label: '무지개 노트', color: '#a855f7' },
+  7:  { label: '스카이블루 다이어리', color: '#0ea5e9' },
+  14: { label: '핑크 다이어리',      color: '#ec4899' },
+  21: { label: '민트 다이어리',      color: '#10b981' },
+  30: { label: '무지개 다이어리',    color: '#a855f7' },
 };
-const MILESTONES = [7, 14, 21, 30];
+const MILESTONE_DAYS = new Set([7, 14, 21, 30]);
 
 function getMonthsInRange(startDate: string, endDate: string): Array<{ year: number; month: number }> {
   const start = new Date(startDate);
@@ -62,7 +61,6 @@ export default function CalendarMonthView({ plan }: Props) {
   const months = getMonthsInRange(plan.startDate, plan.endDate);
   const schedule = plan.weeklySchedule;
 
-  const milestonePositions = calcMilestonePositions(plan, completion, specTasks, specCompletion, MILESTONES);
 
   return (
     <>
@@ -108,8 +106,12 @@ export default function CalendarMonthView({ plan }: Props) {
                       (t) => t.important && !(specDone[t.id] ?? false)
                     );
 
-                    const milestoneInfo = isInVacation ? (milestonePositions[dateStr] ?? null) : null;
-                    const milestone = milestoneInfo ? MILESTONE_INFO[milestoneInfo.milestone] : null;
+                    const vacationDayNum = isInVacation
+                      ? Math.round((new Date(dateStr + 'T00:00:00').getTime() - new Date(plan.startDate + 'T00:00:00').getTime()) / 86400000) + 1
+                      : 0;
+                    const milestone = isInVacation && MILESTONE_DAYS.has(vacationDayNum)
+                      ? MILESTONE_INFO[vacationDayNum]
+                      : null;
 
                     return (
                       <button
@@ -120,7 +122,7 @@ export default function CalendarMonthView({ plan }: Props) {
                         onClick={() => {
                           setSelectedDateStr(dateStr);
                           setSelectedMilestoneLabel(
-                            milestone && milestoneInfo?.achieved
+                            milestone && allDone
                               ? { text: `${milestone.label} 획득!`, color: milestone.color }
                               : null
                           );
@@ -137,11 +139,7 @@ export default function CalendarMonthView({ plan }: Props) {
                               <span className="text-xs font-bold text-white">{date.getDate()}</span>
                             </div>
                             {milestone && (
-                              <FiGift
-                                size={11}
-                                className="mt-0.5"
-                                style={{ color: milestoneInfo?.achieved ? milestone.color : '#d1d5db' }}
-                              />
+                              <FiGift size={11} className="mt-0.5" style={{ color: milestone.color }} />
                             )}
                           </>
                         ) : isToday ? (
@@ -150,7 +148,7 @@ export default function CalendarMonthView({ plan }: Props) {
                               <span className="text-xs font-bold text-orange-500">{date.getDate()}</span>
                             </div>
                             {milestone
-                              ? <FiGift size={11} className="mt-0.5" style={{ color: milestoneInfo?.achieved ? milestone.color : '#d1d5db' }} />
+                              ? <FiGift size={11} className="mt-0.5" style={{ color: '#7dd3fc' }} />
                               : hasImportant && <span className="mt-0.5 leading-none text-yellow-400" style={{ fontSize: 11 }}>★</span>
                             }
                           </>
@@ -164,7 +162,7 @@ export default function CalendarMonthView({ plan }: Props) {
                               {date.getDate()}
                             </span>
                             {milestone
-                              ? <FiGift size={11} className="mt-1" style={{ color: milestoneInfo?.achieved ? milestone.color : '#d1d5db' }} />
+                              ? <FiGift size={11} className="mt-1" style={{ color: '#7dd3fc' }} />
                               : hasImportant && <span className="mt-2 leading-none text-yellow-400" style={{ fontSize: 11 }}>★</span>
                             }
                           </>

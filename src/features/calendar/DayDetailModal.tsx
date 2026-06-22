@@ -3,7 +3,7 @@ import { FiX, FiCircle, FiCheckCircle, FiStar, FiCalendar } from 'react-icons/fi
 import AlertModal from '../../components/AlertModal';
 import type { VacationPlan } from '../../types/vacation';
 import { DAY_LABELS } from '../../types/vacation';
-import { getDayOfWeek, toDateStr } from '../../utils/date';
+import { getDayOfWeek } from '../../utils/date';
 import { useCompletionStore } from '../../stores/completionStore';
 import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 
@@ -18,7 +18,7 @@ export default function DayDetailModal({ dateStr, plan, milestoneLabel, onClose 
   const { completion, toggleTask } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
 
-  const canToggle = dateStr === toDateStr(new Date());
+  const canToggle = true; // TODO: 테스트용, 원래는 dateStr === toDateStr(new Date())
   const [showAlert, setShowAlert] = useState(false);
   const date = new Date(dateStr);
   const day = getDayOfWeek(date);
