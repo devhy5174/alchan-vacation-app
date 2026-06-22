@@ -23,6 +23,13 @@ const MILESTONE_STREAKS: Record<number, React.ReactNode> = {
 
 const MILESTONE_SET = new Set([5, 7, 14, 21]);
 
+const MILESTONE_LABELS: Record<number, { text: string; color: string }> = {
+  5:  { text: '무지개 노트 획득', color: '#a855f7' },
+  7:  { text: '스카이블루 노트 획득', color: '#0ea5e9' },
+  14: { text: '핑크 노트 획득', color: '#ec4899' },
+  21: { text: '민트 노트 획득', color: '#10b981' },
+};
+
 function getMonthsInRange(startDate: string, endDate: string): Array<{ year: number; month: number }> {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -49,6 +56,7 @@ function buildMonthGrid(year: number, month: number): (Date | null)[] {
 
 export default function CalendarMonthView({ plan }: Props) {
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [selectedMilestoneLabel, setSelectedMilestoneLabel] = useState<{ text: string; color: string } | null>(null);
   const { completion } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion } = useSpecificTaskStore();
   const todayStr = toDateStr(new Date());
@@ -120,7 +128,10 @@ export default function CalendarMonthView({ plan }: Props) {
                         ref={(el) => { if (isToday) todayRef.current = el; }}
                         type="button"
                         disabled={!isInVacation}
-                        onClick={() => setSelectedDateStr(dateStr)}
+                        onClick={() => {
+                          setSelectedDateStr(dateStr);
+                          setSelectedMilestoneLabel(MILESTONE_LABELS[streakCount] ?? null);
+                        }}
                         className={`h-14 flex flex-col items-center justify-start pt-1.5 transition-colors
                           ${allDone ? 'bg-orange-50' : ''}
                           ${isInVacation && !allDone ? 'hover:bg-orange-50 cursor-pointer' : ''}
@@ -182,7 +193,8 @@ export default function CalendarMonthView({ plan }: Props) {
         <DayDetailModal
           dateStr={selectedDateStr}
           plan={plan}
-          onClose={() => setSelectedDateStr(null)}
+          milestoneLabel={selectedMilestoneLabel ?? undefined}
+          onClose={() => { setSelectedDateStr(null); setSelectedMilestoneLabel(null); }}
         />
       )}
     </>

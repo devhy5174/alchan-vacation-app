@@ -54,6 +54,7 @@ export default function SpecificDateTaskForm() {
   const [editText, setEditText] = useState('');
   const [editTime, setEditTime] = useState('');
   const [editImportant, setEditImportant] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ date: string; id: string; text: string } | null>(null);
 
   if (!plan) return null;
 
@@ -103,6 +104,40 @@ export default function SpecificDateTaskForm() {
 
   return (
     <>
+      {pendingDelete && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setPendingDelete(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-8 pointer-events-none">
+            <div className="bg-white rounded-2xl p-6 flex flex-col gap-4 shadow-xl pointer-events-auto w-full max-w-xs">
+              <div className="flex flex-col items-center gap-2">
+                <FiTrash2 size={32} className="text-red-400" />
+                <p className="text-base font-bold text-gray-800 text-center">할 일을 삭제할까요?</p>
+                <p className="text-sm text-gray-400 text-center">
+                  <span className="font-medium text-gray-600">"{pendingDelete.text}"</span>을<br />
+                  삭제해요
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPendingDelete(null)}
+                  className="flex-1 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { removeTask(pendingDelete.date, pendingDelete.id); setPendingDelete(null); }}
+                  className="flex-1 py-2.5 bg-red-400 hover:bg-red-500 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {pickerTarget && (
         <TimePickerModal
           value={pickerTarget === 'add' ? inputTime || undefined : editTime || undefined}
@@ -196,7 +231,7 @@ export default function SpecificDateTaskForm() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeTask(dateStr, task.id)}
+                    onClick={() => setPendingDelete({ date: dateStr, id: task.id, text: task.text })}
                     className="text-gray-300 hover:text-red-400 cursor-pointer transition-colors shrink-0"
                   >
                     <FiTrash2 size={13} />

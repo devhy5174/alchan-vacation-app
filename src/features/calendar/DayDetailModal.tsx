@@ -10,10 +10,11 @@ import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 interface Props {
   dateStr: string;
   plan: VacationPlan;
+  milestoneLabel?: { text: string; color: string };
   onClose: () => void;
 }
 
-export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
+export default function DayDetailModal({ dateStr, plan, milestoneLabel, onClose }: Props) {
   const { completion, toggleTask } = useCompletionStore();
   const { tasks: specTasks, completion: specCompletion, toggleTask: toggleSpecTask } = useSpecificTaskStore();
 
@@ -43,7 +44,14 @@ export default function DayDetailModal({ dateStr, plan, onClose }: Props) {
         <div className="bg-white rounded-2xl w-full max-w-sm flex flex-col max-h-[80vh] shadow-xl pointer-events-auto">
           {/* 헤더 */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4">
-            <p className="text-base font-bold text-gray-800">{label}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-bold text-gray-800">{label}</p>
+              {milestoneLabel && (
+                <span className="text-[11px] font-medium" style={{ color: milestoneLabel.color }}>
+                  {milestoneLabel.text}
+                </span>
+              )}
+            </div>
             <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
               <FiX size={20} />
             </button>
