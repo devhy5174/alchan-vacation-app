@@ -77,6 +77,58 @@ export function calcMaxStreak(
   return maxStreak;
 }
 
+// 마일스톤 위치 계산
+// - 달성한 날: { milestone, achieved: true }
+// - 현재 스트릭 기준 예정일: { milestone, achieved: false }
+// - 스트릭이 끊기면 새 스트릭 시작점 기준으로 예정일 재계산
+export function calcMilestonePositions(
+  plan: VacationPlan,
+  completion: CompletionRecord,
+  specTasks: SpecificTaskRecord,
+  specCompletion: SpecificCompletionRecord,
+  milestones: number[]
+): Record<string, { milestone: number; achieved: boolean }> {
+  const result: Record<string, { milestone: number; achieved: boolean }> = {};
+  const milestoneSet = new Set(milestones);
+  const todayStr = toDateStr(new Date());
+  const allDates = getDaysInRange(plan.startDate, plan.endDate);
+
+  // 이미 달성한 마일스톤 찾기
+  const streakPerDay = calcStreakPerDay(plan, completion, specTasks, specCompletion);
+  for (const [dateStr, count] of Object.entries(streakPerDay)) {
+    if (milestoneSet.has(count)) {
+      result[dateStr] = { milestone: count, achieved: true };
+    }
+  }
+
+  // 현재 스트릭에서 미래 마일스톤 위치 예고
+  const currentStreak = calcCurrentStreak(plan, completion, specTasks, specCompletion);
+  if (currentStreak > 0) {
+    // 오늘이 미완료(false)인 경우 calcCurrentStreak이 오늘을 건너뜀
+    // → 오늘을 projection에 포함시켜 선물 위치가 하루 밀리지 않게 보정
+    const todayStatus = isDayComplete(todayStr, plan, completion, specTasks, specCompletion);
+    const includeToday = todayStatus === false; // 할 일 있는데 미완료 상태
+
+    let projected = currentStreak;
+    const maxMilestone = Math.max(...milestones);
+    for (const date of allDates) {
+      const dateStr = toDateStr(date);
+      if (includeToday ? dateStr < todayStr : dateStr <= todayStr) continue;
+      const day = getDayOfWeek(date);
+      const weeklyTasks = plan.weeklySchedule?.[day] ?? [];
+      const specificTasks = specTasks[dateStr] ?? [];
+      if (weeklyTasks.length + specificTasks.length === 0) continue;
+      projected++;
+      if (milestoneSet.has(projected) && !result[dateStr]) {
+        result[dateStr] = { milestone: projected, achieved: false };
+      }
+      if (projected >= maxMilestone) break;
+    }
+  }
+
+  return result;
+}
+
 // 날짜별 연속 달성 카운트 (오늘까지만 / 달력 마일스톤 표시용)
 export function calcStreakPerDay(
   plan: VacationPlan,

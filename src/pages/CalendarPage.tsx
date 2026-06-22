@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { FiList, FiCalendar, FiBookOpen } from 'react-icons/fi';
+import { FiList, FiCalendar, FiBookOpen, FiAward } from 'react-icons/fi';
 import { useVacationStore } from '../stores/vacationStore';
 import CalendarListView from '../features/calendar/CalendarListView';
 import CalendarMonthView from '../features/calendar/CalendarMonthView';
 import CalendarDiaryView from '../features/calendar/CalendarDiaryView';
+import StickerBook from '../features/sticker/StickerBook';
 
 type ViewTab = 'list' | 'month' | 'diary';
 
@@ -19,6 +20,7 @@ export default function CalendarPage() {
     const saved = localStorage.getItem('alchan_calendar_tab');
     return (saved === 'list' || saved === 'month' || saved === 'diary') ? saved : 'list';
   });
+  const [showStickerBook, setShowStickerBook] = useState(false);
 
   function handleTabChange(tab: ViewTab) {
     setActiveTab(tab);
@@ -37,13 +39,30 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-md mx-auto">
+      {showStickerBook && (
+        <StickerBook plan={plan} onClose={() => setShowStickerBook(false)} />
+      )}
+
       {/* 고정 헤더: 제목 + 탭 */}
       <div className="sticky top-0 z-20 bg-orange-50 px-4 pt-8 pb-3 border-b border-orange-100">
-        <div className="text-center mb-4">
-          <h1 className="text-xl font-bold text-gray-800">{plan.childName}의 방학 캘린더</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {plan.startDate} ~ {plan.endDate}
-          </p>
+        <div className="relative flex items-start justify-center mb-4">
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-gray-800">{plan.childName}의 방학 캘린더</h1>
+            <p className="text-sm text-gray-400 mt-1">
+              {plan.startDate} ~ {plan.endDate}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowStickerBook(true)}
+            className="absolute right-0 top-0 flex flex-col items-center gap-0.5 cursor-pointer group"
+            aria-label="스티커판 열기"
+          >
+            <div className="w-9 h-9 rounded-full bg-orange-100 group-hover:bg-orange-200 transition-colors flex items-center justify-center">
+              <FiAward size={18} className="text-orange-400" />
+            </div>
+            <span className="text-xs text-orange-400 font-medium">스티커판</span>
+          </button>
         </div>
 
         <div className="flex bg-gray-100 rounded-xl p-1">
