@@ -7,51 +7,13 @@ import {
   FiShield,
   FiInfo,
   FiChevronRight,
-  FiX,
   FiAlertTriangle,
 } from "react-icons/fi";
 import PinLockScreen from "../components/PinLockScreen";
 
 const PIN_KEY = 'alchan_pin';
 
-const TERMS_CONTENT = `제1조 (목적)
-이 약관은 알찬방학(이하 "앱")의 이용 조건을 정함을 목적으로 합니다.
-
-제2조 (서비스 내용)
-앱은 아이의 방학 계획 작성 및 관리 기능을 제공합니다. 모든 데이터는 기기 내 로컬 저장소에만 저장되며, 별도 서버로 전송되지 않습니다.
-
-제3조 (이용자의 의무)
-이용자는 앱을 통해 타인의 권리를 침해하거나 법령에 위반되는 행위를 해서는 안 됩니다.
-
-제4조 (서비스 변경 및 중단)
-개발자는 서비스 내용을 변경하거나 중단할 수 있으며, 이에 대해 이용자에게 별도의 보상을 하지 않습니다.
-
-제5조 (책임 제한)
-앱은 기기 내 저장 데이터의 유실에 대해 책임을 지지 않습니다. 중요한 데이터는 별도로 백업하시기 바랍니다.
-
-제6조 (문의)
-서비스 관련 문의는 devhy5174@naver.com 으로 연락주세요.`;
-
-const PRIVACY_CONTENT = `알찬방학 개인정보처리방침
-
-최종 업데이트: 2026년 6월 23일
-
-1. 수집하는 개인정보
-알찬방학은 어떠한 개인정보도 수집하지 않습니다.
-
-2. 데이터 저장 방식
-앱에 입력된 모든 정보(아이 이름, 방학 계획, 할 일 등)는 오직 사용자의 기기 내 로컬 저장소(LocalStorage)에만 저장됩니다. 서버 전송, 외부 공유, 광고 활용이 일체 없습니다.
-
-3. 제3자 제공
-수집하는 데이터가 없으므로 제3자에게 제공되는 정보가 없습니다.
-
-4. 데이터 삭제
-앱 내 설정 > 데이터 초기화 또는 기기의 앱 데이터 삭제를 통해 모든 데이터를 삭제할 수 있습니다.
-
-5. 문의
-개인정보 관련 문의: devhy5174@naver.com`;
-
-type ModalType = "terms" | "privacy" | "reset" | null;
+type ModalType = "reset" | null;
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -79,29 +41,6 @@ export default function SettingsPage() {
   return (
     <div className="px-4 py-8">
       <h1 className="text-xl font-bold text-gray-800 mb-6">설정</h1>
-
-      {/* 모달 */}
-      {modal && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-orange-50">
-          <div className="sticky top-0 bg-orange-50 px-4 pt-8 pb-3 border-b border-orange-100 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setModal(null)}
-              className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer"
-            >
-              <FiX size={20} />
-            </button>
-            <h2 className="text-base font-bold text-gray-800">
-              {modal === "terms" ? "이용약관" : "개인정보처리방침"}
-            </h2>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {modal === "terms" ? TERMS_CONTENT : PRIVACY_CONTENT}
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* 데이터 초기화 확인 모달 */}
       {modal === "reset" && (
@@ -167,12 +106,12 @@ export default function SettingsPage() {
           <Item
             icon={<FiFileText size={16} className="text-orange-400" />}
             label="이용약관"
-            onClick={() => setModal("terms")}
+            onClick={() => navigate("/terms")}
           />
           <Item
             icon={<FiShield size={16} className="text-orange-400" />}
             label="개인정보처리방침"
-            onClick={() => setModal("privacy")}
+            onClick={() => navigate("/privacy")}
             last
           />
         </Section>

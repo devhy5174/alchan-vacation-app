@@ -4,6 +4,8 @@ import HomePage from '../pages/HomePage';
 import CalendarPage from '../pages/CalendarPage';
 import ResultPage from '../pages/ResultPage';
 import SettingsPage from '../pages/SettingsPage';
+import PrivacyPage from '../pages/PrivacyPage';
+import TermsPage from '../pages/TermsPage';
 import BottomNavigation from '../components/BottomNavigation';
 import { useVacationStore } from '../stores/vacationStore';
 import { useAutoSaveResult } from '../hooks/useAutoSaveResult';
@@ -48,6 +50,8 @@ export default function AppRoutes() {
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
         <Route path="/result" element={<Layout><ResultPage /></Layout>} />
         <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
       </Routes>
     </BrowserRouter>
   );
