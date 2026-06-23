@@ -480,25 +480,33 @@ export default function CalendarDiaryView({ plan }: Props) {
           <span className="text-xs text-gray-300">
             {idx + 1} / {dates.length}
           </span>
-          <div className="flex items-center gap-0.5 mt-0.5">
+          <div
+            className="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full border"
+            style={{ borderColor: `${accentColor}50`, backgroundColor: `${accentColor}12` }}
+          >
             <button
               type="button"
               onClick={() => setFontStep((s) => Math.max(0, s - 1))}
               disabled={fontStep <= 0}
-              className="w-5 h-5 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+              className="w-4 h-4 flex items-center justify-center transition-opacity cursor-pointer disabled:cursor-default"
+              style={{ color: fontStep <= 0 ? '#d1d5db' : accentColor }}
             >
-              <FiMinus size={9} />
+              <FiMinus size={10} />
             </button>
-            <span className="text-[9px] text-gray-300 w-7 text-center tabular-nums">
+            <span
+              className="text-[10px] font-bold w-8 text-center tabular-nums"
+              style={{ color: accentColor }}
+            >
               {Math.round((fontSize / BASE_FONT) * 100)}%
             </span>
             <button
               type="button"
               onClick={() => setFontStep((s) => Math.min(8, s + 1))}
               disabled={fontStep >= 8}
-              className="w-5 h-5 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+              className="w-4 h-4 flex items-center justify-center transition-opacity cursor-pointer disabled:cursor-default"
+              style={{ color: fontStep >= 8 ? '#d1d5db' : accentColor }}
             >
-              <FiPlus size={9} />
+              <FiPlus size={10} />
             </button>
           </div>
         </div>
