@@ -47,7 +47,7 @@ export default function CalendarListView({ plan }: Props) {
         const totalCount = weeklyTasks.length + specificTasks.length;
         const allDone = totalCount > 0 && completedCount === totalCount;
         const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-        const canToggle = true; // TODO: 테스트용, 원래는 isToday
+        const canToggle = isToday;
 
         return (
           <div
