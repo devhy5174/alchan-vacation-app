@@ -344,7 +344,7 @@ export default function CalendarDiaryView({ plan }: Props) {
                           style={{ height: `${lineH}px`, paddingLeft: `${CONTENT_LEFT}px`, paddingRight: "12px" }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
-                          {!done && <FiStar size={10} className="shrink-0 mx-1" style={{ color: accentColor, fill: 'currentColor' }} />}
+                          {!done && <FiStar size={10} className="star-twinkle shrink-0 mx-1" style={{ color: accentColor, fill: 'currentColor' }} />}
                           <span
                             className={`leading-none ${!done ? "" : "ml-2 hand-strike"}`}
                             style={{ fontSize, ...(!done ? { color: accentColor, fontWeight: 600 } : {}) }}

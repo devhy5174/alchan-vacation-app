@@ -28,3 +28,13 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
 }
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg);     opacity: 0.55; }
+  50%       { transform: scale(1.35) rotate(18deg); opacity: 1; }
+}
+
+.star-twinkle {
+  animation: twinkle 1.8s ease-in-out infinite;
+  display: inline-block;
+}

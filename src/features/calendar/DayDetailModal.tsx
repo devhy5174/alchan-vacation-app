@@ -72,7 +72,7 @@ export default function DayDetailModal({ dateStr, plan, milestoneLabel, onClose 
                       <button type="button" onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)} className="mt-0.5 shrink-0 cursor-pointer transition-colors">
                         {done ? <FiCheckCircle size={17} className="text-orange-400" /> : <FiCircle size={17} className="text-gray-300" />}
                       </button>
-                      {!done && <FiStar size={12} className="mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />}
+                      {!done && <FiStar size={12} className="star-twinkle mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />}
                       <span onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)} className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'font-medium text-orange-500'}`}>
                         {task.time && <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>[{task.time}]</span>}
                         {task.text}
@@ -125,7 +125,7 @@ export default function DayDetailModal({ dateStr, plan, milestoneLabel, onClose 
                         }
                       </button>
                       {task.important && !done && (
-                        <FiStar size={12} className="mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
+                        <FiStar size={12} className="star-twinkle mt-0.5 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
                       )}
                       <span
                         onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}

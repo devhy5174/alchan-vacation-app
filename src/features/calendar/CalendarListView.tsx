@@ -90,7 +90,7 @@ export default function CalendarListView({ plan }: Props) {
                           >
                             {done ? <FiCheckCircle size={15} className="text-orange-400" /> : <FiCircle size={15} className="text-gray-300" />}
                           </button>
-                          {!done && <FiStar size={11} className="mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />}
+                          {!done && <FiStar size={11} className="star-twinkle mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />}
                           <span
                             onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                             className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'font-medium text-orange-500'}`}
@@ -148,7 +148,7 @@ export default function CalendarListView({ plan }: Props) {
                             }
                           </button>
                           {task.important && !done && (
-                            <FiStar size={11} className="mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
+                            <FiStar size={11} className="star-twinkle mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />
                           )}
                           <span
                             onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
