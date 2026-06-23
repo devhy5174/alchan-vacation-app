@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { FiSave } from 'react-icons/fi';
+import { FiSave, FiInfo } from 'react-icons/fi';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import AlertModal from '../../components/AlertModal';
@@ -12,6 +12,7 @@ export default function VacationForm() {
   const { plan, setPlan } = useVacationStore();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [showNoChange, setShowNoChange] = useState(false);
 
   const [form, setForm] = useState<VacationPlan>({
     childName: plan?.childName ?? '',
@@ -44,7 +45,16 @@ export default function VacationForm() {
     if (form.endDate < form.startDate) return;
 
     if (plan) {
-      setShowConfirm(true);
+      const unchanged =
+        form.childName === plan.childName &&
+        form.startDate === plan.startDate &&
+        form.endDate === plan.endDate &&
+        form.goal === plan.goal;
+      if (unchanged) {
+        setShowNoChange(true);
+      } else {
+        setShowConfirm(true);
+      }
     } else {
       doSave();
     }
@@ -71,6 +81,15 @@ export default function VacationForm() {
           subMessage="방학 정보가 업데이트됐어요"
           buttonLabel="확인"
           onClose={() => setShowAlert(false)}
+        />
+      )}
+      {showNoChange && (
+        <AlertModal
+          icon={<FiInfo size={48} />}
+          message="변경사항이 없어요"
+          subMessage="수정된 내용이 없어요"
+          buttonLabel="확인"
+          onClose={() => setShowNoChange(false)}
         />
       )}
 
