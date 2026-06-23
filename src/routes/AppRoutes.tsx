@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import CalendarPage from '../pages/CalendarPage';
 import ResultPage from '../pages/ResultPage';
+import SettingsPage from '../pages/SettingsPage';
 import BottomNavigation from '../components/BottomNavigation';
 import { useVacationStore } from '../stores/vacationStore';
 import { useAutoSaveResult } from '../hooks/useAutoSaveResult';
@@ -46,6 +47,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Layout><HomePage /></Layout>} />
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
         <Route path="/result" element={<Layout><ResultPage /></Layout>} />
+        <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
       </Routes>
     </BrowserRouter>
   );

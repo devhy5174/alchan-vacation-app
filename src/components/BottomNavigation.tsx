@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiHome, FiCalendar, FiAward } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiAward, FiSettings } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 import { useVacationStore } from '../stores/vacationStore';
 import { toDateStr } from '../utils/date';
@@ -9,6 +9,7 @@ type NavItem = { label: string; icon: IconType; path: string };
 const BASE_NAV: NavItem[] = [
   { label: '홈', icon: FiHome, path: '/' },
   { label: '캘린더', icon: FiCalendar, path: '/calendar' },
+  { label: '설정', icon: FiSettings, path: '/settings' },
 ];
 
 const RESULT_NAV: NavItem = { label: '결과', icon: FiAward, path: '/result' };
