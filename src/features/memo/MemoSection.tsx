@@ -20,9 +20,8 @@ export default function MemoSection() {
     saveToStorage(MEMO_KEY, next);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
-    e.preventDefault();
     const text = draft.trim();
     if (!text) return;
     commit([...items, text]);
@@ -59,7 +58,7 @@ export default function MemoSection() {
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
           placeholder={
             items.length === 0 ? "ex) 방학특강 알아보기" : "Enter로 추가"
           }

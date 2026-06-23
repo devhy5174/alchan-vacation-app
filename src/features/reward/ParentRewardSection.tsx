@@ -161,8 +161,8 @@ export default function ParentRewardSection({ plan }: Props) {
                 maxLength={30}
                 placeholder="응원 메시지"
                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleEditSave();
+                onKeyUp={(e) => {
+                  if (e.key === "Enter" && !e.nativeEvent.isComposing) handleEditSave();
                 }}
               />
               <div className="flex gap-2">
@@ -222,8 +222,8 @@ export default function ParentRewardSection({ plan }: Props) {
             placeholder="응원 메시지 입력 (예: 치킨 사줄게!)"
             maxLength={30}
             className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAdd();
+            onKeyUp={(e) => {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) handleAdd();
             }}
           />
           <button
