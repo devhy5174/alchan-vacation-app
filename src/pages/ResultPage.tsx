@@ -6,7 +6,7 @@ import { useCompletionStore } from '../stores/completionStore';
 import { useSpecificTaskStore } from '../stores/specificTaskStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { calcResultStats } from '../utils/resultStats';
-import { toDateStr } from '../utils/date';
+import { toDateStr, getDaysInRange } from '../utils/date';
 import type { VacationResult } from '../types/history';
 import StickerBook from '../features/sticker/StickerBook';
 import CertificatePrint from '../components/CertificatePrint';
@@ -85,6 +85,7 @@ export default function ResultPage() {
   const today = toDateStr(new Date());
   const isVacationOver = today > plan.endDate;
   const stats = calcResultStats(plan, completion, specTasks, specCompletion);
+  const totalVacationDays = getDaysInRange(plan.startDate, plan.endDate).length;
   const previousResults = results.filter(
     (r) => !(r.startDate === plan.startDate && r.endDate === plan.endDate)
   );
@@ -208,7 +209,7 @@ export default function ResultPage() {
       {/* 원형 달성률 */}
       <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm text-center">
         <CircularProgress rate={stats.achievementRate} />
-        <p className="text-xs text-gray-400 mt-3">총 {stats.totalTasks}개 중 {stats.completedTasks}개 완료</p>
+        <p className="text-xs text-gray-400 mt-3">총 {totalVacationDays}일 중 {stats.stickerCount}일 달성</p>
         {!isVacationOver && (
           <p className="text-xs text-orange-400 mt-1.5">방학이 끝나면 결과가 자동 저장돼요</p>
         )}
