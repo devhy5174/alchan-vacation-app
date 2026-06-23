@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { FiAward, FiCheckCircle, FiZap, FiSun, FiStar, FiCalendar, FiPrinter, FiX } from 'react-icons/fi';
 import { useVacationStore } from '../stores/vacationStore';
 import { useCompletionStore } from '../stores/completionStore';
+import { useSpecificTaskStore } from '../stores/specificTaskStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { calcResultStats } from '../utils/resultStats';
 import { toDateStr } from '../utils/date';
@@ -67,6 +68,7 @@ function HistoryItem({ result }: { result: VacationResult }) {
 export default function ResultPage() {
   const plan = useVacationStore((s) => s.plan);
   const completion = useCompletionStore((s) => s.completion);
+  const { tasks: specTasks, completion: specCompletion } = useSpecificTaskStore();
   const results = useHistoryStore((s) => s.results);
   const [showStickerBook, setShowStickerBook] = useState(false);
   const [showCert, setShowCert] = useState(false);
@@ -82,7 +84,7 @@ export default function ResultPage() {
 
   const today = toDateStr(new Date());
   const isVacationOver = today > plan.endDate;
-  const stats = calcResultStats(plan, completion);
+  const stats = calcResultStats(plan, completion, specTasks, specCompletion);
   const previousResults = results.filter(
     (r) => !(r.startDate === plan.startDate && r.endDate === plan.endDate)
   );
