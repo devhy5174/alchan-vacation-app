@@ -25,6 +25,7 @@ export default function CalendarPage() {
   function handleTabChange(tab: ViewTab) {
     setActiveTab(tab);
     localStorage.setItem('alchan_calendar_tab', tab);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   if (!plan) {
