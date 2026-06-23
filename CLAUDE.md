@@ -49,14 +49,18 @@
 src/
 ├─ pages/
 │   ├─ HomePage.tsx
-│   └─ CalendarPage.tsx
+│   ├─ CalendarPage.tsx
+│   └─ ResultPage.tsx
 ├─ components/
 │   ├─ Button.tsx
 │   ├─ Input.tsx
 │   ├─ BottomNavigation.tsx
 │   ├─ AlertModal.tsx
 │   ├─ ConfirmModal.tsx
-│   └─ TimePickerModal.tsx
+│   ├─ TimePickerModal.tsx
+│   ├─ PinLockScreen.tsx
+│   ├─ PinPad.tsx
+│   └─ PinSetupModal.tsx
 ├─ features/
 │   ├─ vacation/
 │   │   ├─ VacationForm.tsx
@@ -70,21 +74,39 @@ src/
 │   │   ├─ CalendarMonthView.tsx
 │   │   ├─ CalendarDiaryView.tsx
 │   │   └─ DayDetailModal.tsx
-│   └─ memo/
-│       └─ MemoSection.tsx
+│   ├─ memo/
+│   │   └─ MemoSection.tsx
+│   ├─ reward/
+│   │   ├─ StreakBanner.tsx
+│   │   ├─ ThemeSelector.tsx
+│   │   ├─ ParentRewardSection.tsx
+│   │   └─ diaryTheme.ts
+│   └─ sticker/
+│       └─ StickerBook.tsx
+├─ hooks/
+│   ├─ useStreak.ts
+│   └─ useAutoSaveResult.ts
 ├─ routes/
 │   └─ AppRoutes.tsx
 ├─ stores/
 │   ├─ vacationStore.ts
 │   ├─ completionStore.ts
-│   └─ specificTaskStore.ts
+│   ├─ specificTaskStore.ts
+│   ├─ rewardStore.ts
+│   ├─ historyStore.ts
+│   └─ parentRewardStore.ts
 ├─ types/
 │   ├─ vacation.ts
 │   ├─ completion.ts
-│   └─ specificTask.ts
+│   ├─ specificTask.ts
+│   ├─ reward.ts
+│   ├─ history.ts
+│   └─ parentReward.ts
 └─ utils/
     ├─ date.ts
-    └─ localStorage.ts
+    ├─ localStorage.ts
+    ├─ streak.ts
+    └─ resultStats.ts
 ```
 
 ---
@@ -110,6 +132,24 @@ src/
 - 다이어리 보기: 날짜별 페이지 플립 UX, 스와이프 제스처 지원
 - 달력 보기: 오늘 날짜 원형 표시 및 자동 스크롤, 중요 일정 ★ 표기
 - 캘린더 탭 선택 상태 유지 (마지막 탭 복원)
+- 홈화면 PIN 잠금 (부모 전용 설정 보호)
+- 할 일 체크는 오늘 날짜에만 가능 (날짜 제한)
+
+### MVP 2단계 ✅ 완료
+
+- **스티커판 (도장판)**: 방학 전체 기간을 5열 그리드로 표시, 당일 할 일 전부 완료 시 도장 자동 찍힘
+  - 주말 할 일 없는 날 자동 도장
+  - 도장 안 아이콘: 마일스톤=선물, 응원=하트, 기본=별
+  - 캘린더 페이지 상단 버튼으로 접근
+- **마일스톤 다이어리 테마 해금**: 방학 7/14/21/30일차 할 일 전부 완료 시 테마 해금
+  - 스티커판: 해금 전 하늘색 선물 아이콘 예고, 해금 시 테마 컬러 + 팝업 안내
+  - 달력 탭: 마일스톤 날짜에 선물 아이콘 표시 (해금 전 회색, 후 컬러)
+- **연속 달성 스트릭 배너**: 현재 연속 달성일 + 최고 기록 표시 (달력·스티커판)
+- **엄마아빠의 응원**: 홈 응원 탭에서 날짜별 응원 메시지/선물 등록
+  - 선물 타입: 즉시 공개 (항상 하트 표시)
+  - 메시지 타입: 당일 공개 (날짜 전까지 스티커판에 안 보임)
+  - 수정/삭제 시 확인 모달
+  - 스티커판 하트 탭하면 팝업으로 내용 공개
 
 ### 현재 구현하지 않는 기능
 
@@ -120,9 +160,7 @@ src/
 - React Query
 - PDF 저장
 - 푸시 알림
-- 스티커 기능
-- 다이어리 꾸미기
-- 연속 달성 기록
+- 다이어리 꾸미기 (스킨, 스티커 붙이기)
 
 ---
 
