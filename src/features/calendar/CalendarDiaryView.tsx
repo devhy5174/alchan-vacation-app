@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar, FiMinus, FiPlus } from "react-icons/fi";
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar } from "react-icons/fi";
 import AlertModal from "../../components/AlertModal";
 import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
@@ -102,11 +102,10 @@ export default function CalendarDiaryView({ plan }: Props) {
   const [pendingIdx, setPendingIdx] = useState(0);
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [showAlert, setShowAlert] = useState(false);
-  const [fontStep, setFontStep] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
-  const fontSize = BASE_FONT + fontStep;
-  const lineH = Math.round(BASE_LINE_H * fontSize / BASE_FONT);
+  const fontSize = BASE_FONT;
+  const lineH = BASE_LINE_H;
 
   function navigate(newIdx: number, direction: "next" | "prev") {
     if (phase !== "idle" || newIdx < 0 || newIdx >= dates.length) return;
@@ -289,56 +288,31 @@ export default function CalendarDiaryView({ plan }: Props) {
                     )}
                   </div>
 
-                  {/* 미니 테마 서클 + 글자 크기 조절 */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      {MINI_THEMES.map(({ id, color, gradient, ringColor }) => {
-                        const unlocked = unlockedThemes.includes(id);
-                        const selected = selectedTheme === id;
-                        return (
-                          <button
-                            key={id}
-                            type="button"
-                            onClick={() => unlocked && setTheme(id)}
-                            className="rounded-full transition-transform active:scale-90"
-                            style={{
-                              width: 12,
-                              height: 12,
-                              background: gradient || color,
-                              filter: unlocked ? 'none' : 'grayscale(100%) opacity(0.3)',
-                              boxShadow: selected ? `0 0 0 1.5px white, 0 0 0 3px ${ringColor}` : 'none',
-                              cursor: unlocked ? 'pointer' : 'default',
-                              border: 'none',
-                              padding: 0,
-                              flexShrink: 0,
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-
-                    {/* 글자 크기 조절 */}
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setFontStep((s) => Math.max(0, s - 1))}
-                        disabled={fontStep <= 0}
-                        className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
-                      >
-                        <FiMinus size={9} />
-                      </button>
-                      <span className="text-[9px] text-gray-400 w-4 text-center tabular-nums">
-                        {fontStep > 0 ? `+${fontStep}` : fontStep}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setFontStep((s) => Math.min(8, s + 1))}
-                        disabled={fontStep >= 8}
-                        className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
-                      >
-                        <FiPlus size={9} />
-                      </button>
-                    </div>
+                  {/* 미니 테마 서클 */}
+                  <div className="flex items-center gap-1">
+                    {MINI_THEMES.map(({ id, color, gradient, ringColor }) => {
+                      const unlocked = unlockedThemes.includes(id);
+                      const selected = selectedTheme === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => unlocked && setTheme(id)}
+                          className="rounded-full transition-transform active:scale-90"
+                          style={{
+                            width: 12,
+                            height: 12,
+                            background: gradient || color,
+                            filter: unlocked ? 'none' : 'grayscale(100%) opacity(0.3)',
+                            boxShadow: selected ? `0 0 0 1.5px white, 0 0 0 3px ${ringColor}` : 'none',
+                            cursor: unlocked ? 'pointer' : 'default',
+                            border: 'none',
+                            padding: 0,
+                            flexShrink: 0,
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
 
