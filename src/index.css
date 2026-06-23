@@ -38,3 +38,47 @@ body {
   animation: twinkle 1.8s ease-in-out infinite;
   display: inline-block;
 }
+
+/* ───── 출력 전용 ───── */
+
+@page { size: A4 portrait; margin: 0; }
+
+/* 수료증 PDF 전용 포털 — 화면에서는 숨김 */
+#print-cert-portal { display: none; }
+
+@media print {
+  body {
+    margin: 0 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* 수료증: #root 숨기고 포털만 표시 */
+  body.printing-cert > #root { display: none !important; }
+  body.printing-cert > #print-cert-portal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+  }
+
+  /* 달성판: visibility 방식 */
+  body.printing-sticker * { visibility: hidden !important; }
+  body.printing-sticker #print-sticker,
+  body.printing-sticker #print-sticker * {
+    visibility: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body.printing-sticker #print-sticker {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    padding-bottom: 10mm !important;
+  }
+}

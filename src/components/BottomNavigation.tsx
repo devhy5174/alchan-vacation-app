@@ -2,7 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FiHome, FiCalendar, FiAward, FiSettings } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 import { useVacationStore } from '../stores/vacationStore';
-import { toDateStr } from '../utils/date';
 
 type NavItem = { label: string; icon: IconType; path: string };
 
@@ -20,8 +19,10 @@ export default function BottomNavigation() {
   const plan = useVacationStore((s) => s.plan);
 
   // 종료일 다음날부터 결과 탭 활성화
-  const showResult = plan ? toDateStr(new Date()) > plan.endDate : false;
-  const navItems = showResult ? [...BASE_NAV, RESULT_NAV] : BASE_NAV;
+  const showResult = !!plan; // TODO: 테스트용 — 원래는 toDateStr(new Date()) > plan.endDate
+  const navItems = showResult
+    ? [BASE_NAV[0], BASE_NAV[1], RESULT_NAV, BASE_NAV[2]]
+    : BASE_NAV;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom">
