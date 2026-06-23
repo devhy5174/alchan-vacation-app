@@ -163,7 +163,8 @@ export default function ParentRewardSection({ plan }: Props) {
                 placeholder="응원 메시지"
                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
                 onKeyUp={(e) => {
-                  if (e.key === "Enter" && !e.nativeEvent.isComposing) handleEditSave();
+                  if (e.key === "Enter" && !e.nativeEvent.isComposing)
+                    handleEditSave();
                 }}
               />
               <div className="flex gap-2">
@@ -220,7 +221,7 @@ export default function ParentRewardSection({ plan }: Props) {
             type="text"
             value={text}
             onChange={(e) => setText(filterBadWords(e.target.value))}
-            placeholder="응원 메시지 입력 (예: 치킨 사줄게!)"
+            placeholder={icon === "message" ? "예: 여기까지 대단한데? 화이팅!" : "예: 치킨먹는날"}
             maxLength={30}
             className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
             onKeyUp={(e) => {
