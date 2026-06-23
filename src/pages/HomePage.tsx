@@ -56,6 +56,7 @@ export default function HomePage() {
         storedPin={storedPin!}
         onUnlock={handleUnlock}
         onGoToCalendar={() => navigate('/calendar')}
+        onResetPin={() => { localStorage.removeItem(PIN_KEY); setUnlocked(true); }}
       />
     );
   }
