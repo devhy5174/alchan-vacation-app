@@ -23,7 +23,8 @@ export default function BottomNavigation() {
   const navItems = showResult ? [...BASE_NAV, RESULT_NAV] : BASE_NAV;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom">
+      <div className="max-w-md mx-auto flex">
       {navItems.map(({ label, icon: Icon, path }) => {
         const active = location.pathname === path;
         return (
@@ -39,6 +40,7 @@ export default function BottomNavigation() {
           </button>
         );
       })}
+      </div>
     </nav>
   );
 }

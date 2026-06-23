@@ -16,7 +16,9 @@ function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-orange-50 pb-20">
       <AutoSaver />
-      {children}
+      <div className="max-w-md mx-auto">
+        {children}
+      </div>
       <BottomNavigation />
     </div>
   );
