@@ -64,8 +64,12 @@ body {
     break-inside: avoid !important;
   }
 
-  /* 달성판: visibility 방식 */
+  /* 달성판: fixed 포지션 해제 후 자연스러운 페이지 흐름 */
   body.printing-sticker * { visibility: hidden !important; }
+  body.printing-sticker #print-sticker-root {
+    position: static !important;
+    background: none !important;
+  }
   body.printing-sticker #print-sticker,
   body.printing-sticker #print-sticker * {
     visibility: visible !important;
@@ -73,12 +77,14 @@ body {
     -webkit-print-color-adjust: exact;
   }
   body.printing-sticker #print-sticker {
-    position: fixed !important;
-    top: 0 !important; left: 0 !important;
-    width: 100% !important;
+    position: relative !important;
+    width: 210mm !important;
+    max-width: none !important;
+    height: auto !important;
     max-height: none !important;
     overflow: visible !important;
     border-radius: 0 !important;
+    margin: 0 auto !important;
     padding-bottom: 10mm !important;
   }
 }
