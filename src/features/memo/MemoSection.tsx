@@ -5,6 +5,7 @@ import {
   saveToStorage,
   MEMO_KEY,
 } from "../../utils/localStorage";
+import { filterBadWords } from "../../utils/filter";
 
 function loadMemos(): string[] {
   const raw = loadFromStorage<unknown>(MEMO_KEY);
@@ -57,10 +58,12 @@ export default function MemoSection() {
         <input
           type="text"
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => setDraft(filterBadWords(e.target.value))}
           onKeyUp={handleKeyUp}
           placeholder={
-            items.length === 0 ? "ex) 방학특강 알아보기" : "Enter로 추가"
+            items.length === 0
+              ? "ex) 방학특강 알아보기"
+              : "Enter 또는 Shift+Enter로 추가"
           }
           className="w-full py-1.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none bg-transparent"
         />

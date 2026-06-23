@@ -7,6 +7,7 @@ import {
   FiEdit2,
   FiCalendar,
 } from "react-icons/fi";
+import { filterBadWords } from "../../utils/filter";
 import type { VacationPlan } from "../../types/vacation";
 import type { RewardIcon, ParentReward } from "../../types/parentReward";
 import { useParentRewardStore } from "../../stores/parentRewardStore";
@@ -157,7 +158,7 @@ export default function ParentRewardSection({ plan }: Props) {
               <input
                 type="text"
                 value={editText}
-                onChange={(e) => setEditText(e.target.value)}
+                onChange={(e) => setEditText(filterBadWords(e.target.value))}
                 maxLength={30}
                 placeholder="응원 메시지"
                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
@@ -218,7 +219,7 @@ export default function ParentRewardSection({ plan }: Props) {
           <input
             type="text"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => setText(filterBadWords(e.target.value))}
             placeholder="응원 메시지 입력 (예: 치킨 사줄게!)"
             maxLength={30}
             className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"

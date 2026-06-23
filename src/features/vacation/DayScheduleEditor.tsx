@@ -8,6 +8,7 @@ import {
   FiClock,
 } from "react-icons/fi";
 import { DAY_LABELS } from "../../types/vacation";
+import { filterBadWords } from "../../utils/filter";
 import type { DayOfWeek, Task } from "../../types/vacation";
 import TimePickerModal from "../../components/TimePickerModal";
 
@@ -180,7 +181,7 @@ export default function DayScheduleEditor({
               <input
                 type="text"
                 value={editText}
-                onChange={(e) => setEditText(e.target.value)}
+                onChange={(e) => setEditText(filterBadWords(e.target.value))}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") handleEditCancel();
                 }}
@@ -238,7 +239,7 @@ export default function DayScheduleEditor({
           <input
             type="text"
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => setInputText(filterBadWords(e.target.value))}
             onKeyUp={(e) => {
               if (e.key === "Enter") handleAdd();
             }}

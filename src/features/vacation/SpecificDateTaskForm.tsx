@@ -4,6 +4,7 @@ import TimePickerModal from '../../components/TimePickerModal';
 import { useSpecificTaskStore } from '../../stores/specificTaskStore';
 import { useVacationStore } from '../../stores/vacationStore';
 import type { SpecificTask } from '../../types/specificTask';
+import { filterBadWords } from '../../utils/filter';
 
 function TimeButton({ time, onClick }: { time: string; onClick: () => void }) {
   return (
@@ -169,7 +170,7 @@ export default function SpecificDateTaskForm() {
             <input
               type="text"
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={(e) => setInputText(filterBadWords(e.target.value))}
               onKeyUp={(e) => { if (e.key === 'Enter') handleAdd(); }}
               placeholder="할 일을 입력하세요"
               className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-lg border border-orange-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300 placeholder-gray-300"
@@ -196,7 +197,7 @@ export default function SpecificDateTaskForm() {
                   <input
                     type="text"
                     value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
+                    onChange={(e) => setEditText(filterBadWords(e.target.value))}
                     onKeyDown={(e) => { if (e.key === 'Escape') handleEditCancel(); }}
                     onKeyUp={(e) => { if (e.key === 'Enter') handleEditSave(); }}
                     autoFocus

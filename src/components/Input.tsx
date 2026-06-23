@@ -1,3 +1,5 @@
+import { filterBadWords } from "../utils/filter";
+
 interface InputProps {
   label: string;
   type?: string;
@@ -14,7 +16,7 @@ export default function Input({ label, type = 'text', value, onChange, placehold
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(type === "text" ? filterBadWords(e.target.value) : e.target.value)}
         placeholder={placeholder}
         required={required}
         className="px-4 py-3 rounded-xl border border-orange-200 bg-white text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-orange-300 placeholder-gray-300"

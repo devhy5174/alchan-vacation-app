@@ -4,6 +4,7 @@ import { DAYS_OF_WEEK, DAY_LABELS } from '../../types/vacation';
 import type { DayOfWeek, Task } from '../../types/vacation';
 import Button from '../../components/Button';
 import TimePickerModal from '../../components/TimePickerModal';
+import { filterBadWords } from '../../utils/filter';
 
 interface Props {
   onAdd: (task: Task, days: DayOfWeek[]) => void;
@@ -67,7 +68,7 @@ export default function RepeatTaskAdder({ onAdd }: Props) {
         <input
           type="text"
           value={taskInput}
-          onChange={(e) => setTaskInput(e.target.value)}
+          onChange={(e) => setTaskInput(filterBadWords(e.target.value))}
           onKeyUp={(e) => { if (e.key === 'Enter') handleAdd(); }}
           placeholder="여러 요일에 반복할 할 일 입력"
           className="flex-1 min-w-0 px-3 py-2 text-sm rounded-lg border border-orange-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300 placeholder-gray-300"
