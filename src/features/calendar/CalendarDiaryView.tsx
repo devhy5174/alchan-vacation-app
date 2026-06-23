@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar } from "react-icons/fi";
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar, FiMinus, FiPlus } from "react-icons/fi";
 import AlertModal from "../../components/AlertModal";
 import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
@@ -33,7 +33,8 @@ function formatNavDate(date: Date): string {
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-const LINE_H = 28;
+const BASE_FONT = 14;
+const BASE_LINE_H = 28;
 const CONTENT_LEFT = 20;
 const RING_COUNT = 13;
 
@@ -101,7 +102,11 @@ export default function CalendarDiaryView({ plan }: Props) {
   const [pendingIdx, setPendingIdx] = useState(0);
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [showAlert, setShowAlert] = useState(false);
+  const [fontStep, setFontStep] = useState(0);
   const touchStartX = useRef<number | null>(null);
+
+  const fontSize = BASE_FONT + fontStep;
+  const lineH = Math.round(BASE_LINE_H * fontSize / BASE_FONT);
 
   function navigate(newIdx: number, direction: "next" | "prev") {
     if (phase !== "idle" || newIdx < 0 || newIdx >= dates.length) return;
@@ -165,7 +170,7 @@ export default function CalendarDiaryView({ plan }: Props) {
 
   const notebookBg = {
     backgroundColor: colors.notebookBg,
-    backgroundImage: `repeating-linear-gradient(transparent, transparent 27px, ${colors.lines} 27px, ${colors.lines} 28px)`,
+    backgroundImage: `repeating-linear-gradient(transparent, transparent ${lineH - 1}px, ${colors.lines} ${lineH - 1}px, ${colors.lines} ${lineH}px)`,
     backgroundAttachment: "local" as const,
   };
 
@@ -262,7 +267,7 @@ export default function CalendarDiaryView({ plan }: Props) {
                 <div
                   className="flex items-center justify-between"
                   style={{
-                    height: `${LINE_H + 8}px`,
+                    height: `${lineH + 8}px`,
                     paddingLeft: `${CONTENT_LEFT}px`,
                     paddingRight: "10px",
                     paddingTop: "6px",
@@ -284,31 +289,56 @@ export default function CalendarDiaryView({ plan }: Props) {
                     )}
                   </div>
 
-                  {/* 미니 테마 서클 */}
-                  <div className="flex items-center gap-1">
-                    {MINI_THEMES.map(({ id, color, gradient, ringColor }) => {
-                      const unlocked = unlockedThemes.includes(id);
-                      const selected = selectedTheme === id;
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => unlocked && setTheme(id)}
-                          className="rounded-full transition-transform active:scale-90"
-                          style={{
-                            width: 12,
-                            height: 12,
-                            background: gradient || color,
-                            filter: unlocked ? 'none' : 'grayscale(100%) opacity(0.3)',
-                            boxShadow: selected ? `0 0 0 1.5px white, 0 0 0 3px ${ringColor}` : 'none',
-                            cursor: unlocked ? 'pointer' : 'default',
-                            border: 'none',
-                            padding: 0,
-                            flexShrink: 0,
-                          }}
-                        />
-                      );
-                    })}
+                  {/* 미니 테마 서클 + 글자 크기 조절 */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      {MINI_THEMES.map(({ id, color, gradient, ringColor }) => {
+                        const unlocked = unlockedThemes.includes(id);
+                        const selected = selectedTheme === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => unlocked && setTheme(id)}
+                            className="rounded-full transition-transform active:scale-90"
+                            style={{
+                              width: 12,
+                              height: 12,
+                              background: gradient || color,
+                              filter: unlocked ? 'none' : 'grayscale(100%) opacity(0.3)',
+                              boxShadow: selected ? `0 0 0 1.5px white, 0 0 0 3px ${ringColor}` : 'none',
+                              cursor: unlocked ? 'pointer' : 'default',
+                              border: 'none',
+                              padding: 0,
+                              flexShrink: 0,
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {/* 글자 크기 조절 */}
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setFontStep((s) => Math.max(0, s - 1))}
+                        disabled={fontStep <= 0}
+                        className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+                      >
+                        <FiMinus size={9} />
+                      </button>
+                      <span className="text-[9px] text-gray-400 w-4 text-center tabular-nums">
+                        {fontStep > 0 ? `+${fontStep}` : fontStep}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setFontStep((s) => Math.min(8, s + 1))}
+                        disabled={fontStep >= 8}
+                        className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+                      >
+                        <FiPlus size={9} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -323,13 +353,16 @@ export default function CalendarDiaryView({ plan }: Props) {
                           onClick={() => isToday ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
                           style={{
-                            height: `${LINE_H}px`,
+                            height: `${lineH}px`,
                             paddingLeft: `${CONTENT_LEFT}px`,
                             paddingRight: "12px",
                           }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
-                          <span className={`text-sm leading-none ml-2 ${done ? "hand-strike" : "text-gray-700"}`}>
+                          <span
+                            className={`leading-none ml-2 ${done ? "hand-strike" : "text-gray-700"}`}
+                            style={{ fontSize }}
+                          >
                             {task.time && (
                               <span
                                 className="font-medium mr-1"
@@ -351,22 +384,23 @@ export default function CalendarDiaryView({ plan }: Props) {
                           onClick={() => isToday ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
                           style={{
-                            height: `${LINE_H}px`,
+                            height: `${lineH}px`,
                             paddingLeft: `${CONTENT_LEFT}px`,
                             paddingRight: "12px",
                           }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
                           <span
-                            className={`text-sm leading-none ml-2 ${done ? "hand-strike" : ""}`}
-                            style={
-                              !done
+                            className={`leading-none ml-2 ${done ? "hand-strike" : ""}`}
+                            style={{
+                              fontSize,
+                              ...(!done
                                 ? {
                                     color: task.important ? accentColor : "#374151",
                                     fontWeight: task.important ? 600 : undefined,
                                   }
-                                : undefined
-                            }
+                                : {}),
+                            }}
                           >
                             {task.time && (
                               <span
@@ -385,9 +419,9 @@ export default function CalendarDiaryView({ plan }: Props) {
                 ) : (
                   <div
                     className="flex items-center italic"
-                    style={{ height: `${LINE_H}px`, paddingLeft: `${CONTENT_LEFT}px` }}
+                    style={{ height: `${lineH}px`, paddingLeft: `${CONTENT_LEFT}px` }}
                   >
-                    <p className="text-sm text-gray-300">할 일이 없는 날이에요</p>
+                    <p className="text-gray-300" style={{ fontSize }}>할 일이 없는 날이에요</p>
                   </div>
                 )}
               </div>
