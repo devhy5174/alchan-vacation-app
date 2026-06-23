@@ -1,7 +1,17 @@
+import { useNavigate } from 'react-router-dom';
+import { FiChevronLeft } from 'react-icons/fi';
+
 export default function TermsPage() {
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-white px-5 py-10 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-gray-800 mb-6">이용약관</h1>
+    <div className="min-h-screen bg-white max-w-lg mx-auto">
+      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-2">
+        <button type="button" onClick={() => navigate(-1)} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+          <FiChevronLeft size={22} />
+        </button>
+        <h1 className="text-base font-bold text-gray-800">이용약관</h1>
+      </div>
+      <div className="px-5 py-6">
 
       <div className="flex flex-col gap-6 text-sm text-gray-700 leading-relaxed">
         <section>
@@ -52,6 +62,7 @@ export default function TermsPage() {
             </a>
           </p>
         </section>
+      </div>
       </div>
     </div>
   );
