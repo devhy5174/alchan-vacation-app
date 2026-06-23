@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiMail,
   FiTrash2,
@@ -9,6 +10,9 @@ import {
   FiX,
   FiAlertTriangle,
 } from "react-icons/fi";
+import PinLockScreen from "../components/PinLockScreen";
+
+const PIN_KEY = 'alchan_pin';
 
 const TERMS_CONTENT = `제1조 (목적)
 이 약관은 알찬방학(이하 "앱")의 이용 조건을 정함을 목적으로 합니다.
@@ -50,8 +54,22 @@ const PRIVACY_CONTENT = `알찬방학 개인정보처리방침
 type ModalType = "terms" | "privacy" | "reset" | null;
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
+  const storedPin = localStorage.getItem(PIN_KEY);
+  const [unlocked, setUnlocked] = useState(!storedPin);
   const [modal, setModal] = useState<ModalType>(null);
   const [resetDone, setResetDone] = useState(false);
+
+  if (!unlocked) {
+    return (
+      <PinLockScreen
+        storedPin={storedPin!}
+        onUnlock={() => setUnlocked(true)}
+        onGoToCalendar={() => navigate(-1)}
+        onResetPin={() => { localStorage.removeItem(PIN_KEY); setUnlocked(true); }}
+      />
+    );
+  }
 
   function handleReset() {
     localStorage.clear();
