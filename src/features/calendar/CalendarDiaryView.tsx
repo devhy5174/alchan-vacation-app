@@ -168,7 +168,10 @@ export default function CalendarDiaryView({ plan }: Props) {
   const dateStr = toDateStr(date);
   const isToday = dateStr === todayStr;
   const completions = completion[dateStr] ?? [];
-  const specificTasks = [...(specTasks[dateStr] ?? [])].sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
+  const allSpecificTasks = specTasks[dateStr] ?? [];
+  const importantSpecTasks = allSpecificTasks.filter((t) => t.important);
+  const normalSpecTasks = allSpecificTasks.filter((t) => !t.important);
+  const specificTasks = allSpecificTasks;
   const specDone = specCompletion[dateStr] ?? {};
   const weeklyDoneCount = weeklyTasks.filter((_, i) => completions[i] ?? false).length;
   const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
@@ -328,9 +331,30 @@ export default function CalendarDiaryView({ plan }: Props) {
                   </div>
                 </div>
 
-                {/* 할 일 목록 */}
+                {/* 할 일 목록: 중요 특별 → 반복 → 일반 특별 */}
                 {totalCount > 0 ? (
                   <ul>
+                    {importantSpecTasks.map((task) => {
+                      const done = specDone[task.id] ?? false;
+                      return (
+                        <li
+                          key={`si-${task.id}`}
+                          onClick={() => isToday ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
+                          className="flex items-center cursor-pointer select-none"
+                          style={{ height: `${lineH}px`, paddingLeft: `${CONTENT_LEFT}px`, paddingRight: "12px" }}
+                        >
+                          <CheckMark done={done} doneColor={colors.checkDone} />
+                          {!done && <FiStar size={10} className="shrink-0 mx-1" style={{ color: accentColor, fill: 'currentColor' }} />}
+                          <span
+                            className={`leading-none ${!done ? "" : "ml-2 hand-strike"}`}
+                            style={{ fontSize, ...(!done ? { color: accentColor, fontWeight: 600 } : {}) }}
+                          >
+                            {task.time && <span className="font-medium mr-1" style={{ color: done ? undefined : accentColor }}>[{task.time}]</span>}
+                            {task.text}
+                          </span>
+                        </li>
+                      );
+                    })}
                     {weeklyTasks.map((task, i) => {
                       const done = completions[i] ?? false;
                       return (
@@ -338,67 +362,34 @@ export default function CalendarDiaryView({ plan }: Props) {
                           key={`w-${i}`}
                           onClick={() => isToday ? toggleTask(dateStr, i, weeklyTasks.length) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
-                          style={{
-                            height: `${lineH}px`,
-                            paddingLeft: `${CONTENT_LEFT}px`,
-                            paddingRight: "12px",
-                          }}
+                          style={{ height: `${lineH}px`, paddingLeft: `${CONTENT_LEFT}px`, paddingRight: "12px" }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
                           <span
                             className={`leading-none ml-2 ${done ? "hand-strike" : "text-gray-700"}`}
                             style={{ fontSize }}
                           >
-                            {task.time && (
-                              <span
-                                className="font-medium mr-1"
-                                style={{ color: done ? undefined : accentColor }}
-                              >
-                                [{task.time}]
-                              </span>
-                            )}
+                            {task.time && <span className="font-medium mr-1" style={{ color: done ? undefined : accentColor }}>[{task.time}]</span>}
                             {task.text}
                           </span>
                         </li>
                       );
                     })}
-                    {specificTasks.map((task) => {
+                    {normalSpecTasks.map((task) => {
                       const done = specDone[task.id] ?? false;
                       return (
                         <li
-                          key={`s-${task.id}`}
+                          key={`sn-${task.id}`}
                           onClick={() => isToday ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
                           className="flex items-center cursor-pointer select-none"
-                          style={{
-                            height: `${lineH}px`,
-                            paddingLeft: `${CONTENT_LEFT}px`,
-                            paddingRight: "12px",
-                          }}
+                          style={{ height: `${lineH}px`, paddingLeft: `${CONTENT_LEFT}px`, paddingRight: "12px" }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
-                          {task.important && !done && (
-                            <FiStar size={10} className="shrink-0 mx-1" style={{ color: accentColor, fill: 'currentColor' }} />
-                          )}
                           <span
-                            className={`leading-none ${task.important && !done ? "" : "ml-2"} ${done ? "hand-strike" : ""}`}
-                            style={{
-                              fontSize,
-                              ...(!done
-                                ? {
-                                    color: task.important ? accentColor : "#374151",
-                                    fontWeight: task.important ? 600 : undefined,
-                                  }
-                                : {}),
-                            }}
+                            className={`leading-none ml-2 ${done ? "hand-strike" : ""}`}
+                            style={{ fontSize, ...(!done ? { color: "#374151" } : {}) }}
                           >
-                            {task.time && (
-                              <span
-                                className="font-medium mr-1"
-                                style={{ color: done ? undefined : accentColor }}
-                              >
-                                [{task.time}]
-                              </span>
-                            )}
+                            {task.time && <span className="font-medium mr-1" style={{ color: done ? undefined : accentColor }}>[{task.time}]</span>}
                             {task.text}
                           </span>
                         </li>

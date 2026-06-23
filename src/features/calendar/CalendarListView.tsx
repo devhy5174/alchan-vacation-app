@@ -34,7 +34,10 @@ export default function CalendarListView({ plan }: Props) {
         const isWeekend = day === 'sat' || day === 'sun';
         const isToday = dateStr === todayStr;
 
-        const specificTasks = [...(specTasks[dateStr] ?? [])].sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
+        const allSpecTasks = specTasks[dateStr] ?? [];
+        const importantSpecTasks = allSpecTasks.filter((t) => t.important);
+        const normalSpecTasks = allSpecTasks.filter((t) => !t.important);
+        const specificTasks = [...importantSpecTasks, ...normalSpecTasks];
         const completions = completion[dateStr] ?? [];
         const specDone = specCompletion[dateStr] ?? {};
 
@@ -74,6 +77,30 @@ export default function CalendarListView({ plan }: Props) {
               <div className="flex-1 min-w-0">
                 {totalCount > 0 ? (
                   <ul className="flex flex-col gap-1">
+                    {/* 중요 특별 할 일 (최상단) */}
+                    {importantSpecTasks.map((task) => {
+                      const done = specDone[task.id] ?? false;
+                      return (
+                        <li key={`si-${task.id}`} className="flex items-start gap-2">
+                          <button
+                            type="button"
+                            onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
+                            className="mt-0.5 shrink-0 cursor-pointer transition-colors"
+                            aria-label={done ? '완료 취소' : '완료'}
+                          >
+                            {done ? <FiCheckCircle size={15} className="text-orange-400" /> : <FiCircle size={15} className="text-gray-300" />}
+                          </button>
+                          {!done && <FiStar size={11} className="mt-1 shrink-0 text-orange-400" style={{ fill: 'currentColor' }} />}
+                          <span
+                            onClick={() => canToggle ? toggleSpecTask(dateStr, task.id) : setShowAlert(true)}
+                            className={`text-sm leading-snug cursor-pointer select-none ${done ? 'line-through text-gray-300' : 'font-medium text-orange-500'}`}
+                          >
+                            {task.time && <span className={`font-medium mr-1 ${done ? 'text-gray-300' : 'text-orange-400'}`}>[{task.time}]</span>}
+                            {task.text}
+                          </span>
+                        </li>
+                      );
+                    })}
                     {/* 반복 할 일 */}
                     {weeklyTasks.map((task, i) => {
                       const done = completions[i] ?? false;
@@ -104,8 +131,8 @@ export default function CalendarListView({ plan }: Props) {
                         </li>
                       );
                     })}
-                    {/* 특별 할 일 */}
-                    {specificTasks.map((task) => {
+                    {/* 일반 특별 할 일 */}
+                    {normalSpecTasks.map((task) => {
                       const done = specDone[task.id] ?? false;
                       return (
                         <li key={`s-${task.id}`} className="flex items-start gap-2">
