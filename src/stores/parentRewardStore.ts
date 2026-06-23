@@ -5,6 +5,7 @@ import { loadFromStorage, saveToStorage, PARENT_REWARDS_KEY } from '../utils/loc
 interface ParentRewardState {
   rewards: ParentReward[];
   addReward: (date: string, text: string, icon: RewardIcon) => void;
+  updateReward: (id: string, date: string, text: string, icon: RewardIcon) => void;
   removeReward: (id: string) => void;
 }
 
@@ -15,6 +16,15 @@ export const useParentRewardStore = create<ParentRewardState>((set) => ({
     set((state) => {
       const reward: ParentReward = { id: crypto.randomUUID(), date, text, icon };
       const next = [...state.rewards, reward].sort((a, b) => a.date.localeCompare(b.date));
+      saveToStorage(PARENT_REWARDS_KEY, next);
+      return { rewards: next };
+    }),
+
+  updateReward: (id, date, text, icon) =>
+    set((state) => {
+      const next = state.rewards
+        .map((r) => (r.id === id ? { ...r, date, text, icon } : r))
+        .sort((a, b) => a.date.localeCompare(b.date));
       saveToStorage(PARENT_REWARDS_KEY, next);
       return { rewards: next };
     }),

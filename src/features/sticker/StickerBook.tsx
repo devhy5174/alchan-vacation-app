@@ -35,6 +35,11 @@ export default function StickerBook({ plan, onClose }: Props) {
     dayNum: number;
     achieved: boolean;
   } | null>(null);
+  const [selectedCombined, setSelectedCombined] = useState<{
+    dayNum: number;
+    achieved: boolean;
+    reward: ParentReward;
+  } | null>(null);
 
   const dates = getDaysInRange(plan.startDate, plan.endDate);
   const todayStr = toDateStr(new Date());
@@ -73,7 +78,10 @@ export default function StickerBook({ plan, onClose }: Props) {
   for (const r of parentRewards) {
     rewardByDate[r.date] = r;
   }
-  const revealedRewards = parentRewards.filter((r) => r.date <= todayStr);
+  // 선물은 항상 공개, 메시지는 당일부터 공개
+  const revealedRewards = parentRewards.filter((r) =>
+    r.icon === 'gift' || r.date <= todayStr
+  );
 
   const stickerCount = Object.values(stickerMap).filter(Boolean).length;
   const totalDays = dates.length;
@@ -162,7 +170,56 @@ export default function StickerBook({ plan, onClose }: Props) {
           );
         })()}
 
-      {/* 보상 팝업 */}
+      {/* 합쳐진 팝업 (마일스톤 + 응원) */}
+      {selectedCombined && (() => {
+        const info = MILESTONE_INFO[selectedCombined.dayNum];
+        const r = selectedCombined.reward;
+        return (
+          <div
+            className="fixed inset-0 z-60 flex items-center justify-center px-6"
+            onClick={(e) => { e.stopPropagation(); setSelectedCombined(null); }}
+          >
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <FiGift size={15} style={{ color: info.color }} />
+                  <FiHeart size={15} style={{ color: '#f472b6', fill: '#f472b6' }} />
+                  <span className="text-sm font-bold text-gray-700">특별한 날</span>
+                </div>
+                <button type="button" onClick={() => setSelectedCombined(null)} className="text-gray-400 cursor-pointer">
+                  <FiX size={18} />
+                </button>
+              </div>
+              <div className="px-5 pb-6 flex flex-col gap-3">
+                {/* 마일스톤 */}
+                <div className="rounded-xl px-4 py-3 flex items-center gap-3"
+                  style={{ backgroundColor: `${info.color}15`, border: `1px solid ${info.color}30` }}>
+                  <FiGift size={20} style={{ color: info.color, flexShrink: 0 }} />
+                  <div>
+                    <p className="text-xs font-medium" style={{ color: info.color }}>방학 {selectedCombined.dayNum}일차 달성 보상</p>
+                    <p className="text-sm font-bold text-gray-800">{info.label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {selectedCombined.achieved ? '다이어리 테마 해금!' : '할 일을 모두 완료하면 해금돼요'}
+                    </p>
+                  </div>
+                </div>
+                {/* 응원 */}
+                <div className="rounded-xl px-4 py-3 flex items-center gap-3 bg-pink-50 border border-pink-100">
+                  {r.icon === 'message'
+                    ? <FiMessageCircle size={20} className="text-pink-400 shrink-0" />
+                    : <FiGift size={20} className="text-pink-400 shrink-0" />}
+                  <div>
+                    <p className="text-xs text-pink-400 font-medium">엄마·아빠의 응원</p>
+                    <p className="text-sm font-bold text-gray-800 mt-0.5">{r.text}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 응원 팝업 */}
       {selectedReward && (
         <div
           className="fixed inset-0 z-60 flex items-center justify-center px-6"
@@ -194,16 +251,12 @@ export default function StickerBook({ plan, onClose }: Props) {
             </div>
 
             <div className="px-5 pb-6">
-              <p className="text-xs text-gray-400 mb-3">
-                {selectedReward.date}
-              </p>
+              <p className="text-xs text-gray-400 mb-3">{selectedReward.date}</p>
               <div className="bg-pink-50 border border-pink-100 rounded-xl px-4 py-4 flex items-center gap-3">
                 {selectedReward.icon === 'message'
                   ? <FiMessageCircle size={22} className="text-pink-400 shrink-0" />
                   : <FiGift size={22} className="text-pink-400 shrink-0" />}
-                <p className="text-base font-bold text-gray-800">
-                  {selectedReward.text}
-                </p>
+                <p className="text-base font-bold text-gray-800">{selectedReward.text}</p>
               </div>
             </div>
           </div>
@@ -291,9 +344,10 @@ export default function StickerBook({ plan, onClose }: Props) {
                   : null;
                 const milestoneAchieved = milestone !== null && hasSticker;
 
-                // 응원
+                // 응원 (메시지는 당일 전까지 숨김)
                 const rewardObj = rewardByDate[dateStr] ?? null;
-                const rewardText = rewardObj?.text ?? null;
+                const msgLocked = rewardObj?.icon === 'message' && rewardObj.date > todayStr;
+                const rewardText = rewardObj && !msgLocked ? rewardObj.text : null;
 
                 return (
                   <div
@@ -302,15 +356,20 @@ export default function StickerBook({ plan, onClose }: Props) {
                   >
                     {/* 도장 영역 */}
                     <div
-                      className={`w-14 h-14 flex items-center justify-center ${hasSticker || milestone ? 'cursor-pointer' : ''}`}
-                      onClick={hasSticker
-                        ? () => {
-                            if (milestoneAchieved) setSelectedMilestone({ dayNum, achieved: true });
-                            else if (rewardText) { const r = parentRewards.find((r) => r.date === dateStr); if (r) setSelectedReward(r); }
-                          }
-                        : milestone
-                          ? (e) => { e.stopPropagation(); setSelectedMilestone({ dayNum, achieved: false }); }
-                          : undefined}
+                      className={`w-14 h-14 flex items-center justify-center ${hasSticker || milestone || rewardText ? 'cursor-pointer' : ''}`}
+                      onClick={() => {
+                        if (hasSticker) {
+                          if (milestoneAchieved && rewardObj && !msgLocked) setSelectedCombined({ dayNum, achieved: true, reward: rewardObj });
+                          else if (milestoneAchieved) setSelectedMilestone({ dayNum, achieved: true });
+                          else if (rewardObj && !msgLocked) setSelectedReward(rewardObj);
+                        } else if (milestone && rewardObj && !msgLocked) {
+                          setSelectedCombined({ dayNum, achieved: false, reward: rewardObj });
+                        } else if (milestone) {
+                          setSelectedMilestone({ dayNum, achieved: false });
+                        } else if (rewardObj) {
+                          setSelectedReward(rewardObj);
+                        }
+                      }}
                     >
                       {hasSticker ? (
                         <div
@@ -322,7 +381,12 @@ export default function StickerBook({ plan, onClose }: Props) {
                               : {}),
                           }}
                         >
-                          {milestoneAchieved && milestone ? (
+                          {milestoneAchieved && rewardText ? (
+                            <div className="flex items-center gap-1">
+                              <FiGift size={16} className="text-white" />
+                              <FiHeart size={16} className="text-white" style={{ fill: 'white' }} />
+                            </div>
+                          ) : milestoneAchieved ? (
                             <FiGift size={24} className="text-white" />
                           ) : rewardText ? (
                             <FiHeart size={24} className="text-white" style={{ fill: 'white' }} />
@@ -330,21 +394,19 @@ export default function StickerBook({ plan, onClose }: Props) {
                             <FiStar size={26} className="text-white" style={{ fill: 'white' }} />
                           )}
                         </div>
+                      ) : milestone && rewardText ? (
+                        <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-200 bg-white flex items-center justify-center gap-1">
+                          <FiGift size={14} style={{ color: '#7dd3fc' }} />
+                          <FiHeart size={14} style={{ color: '#f472b6', fill: '#f472b6' }} />
+                        </div>
                       ) : milestone ? (
                         <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-200 bg-white flex items-center justify-center">
                           <FiGift size={18} style={{ color: '#7dd3fc' }} />
                         </div>
                       ) : rewardText ? (
-                        <button
-                          type="button"
-                          className="w-14 h-14 rounded-full border-2 border-dashed border-pink-200 bg-pink-50 flex items-center justify-center cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (rewardObj) setSelectedReward(rewardObj);
-                          }}
-                        >
+                        <div className="w-14 h-14 rounded-full border-2 border-dashed border-pink-200 bg-pink-50 flex items-center justify-center">
                           <FiHeart size={18} style={{ color: '#f472b6', fill: '#f472b6' }} />
-                        </button>
+                        </div>
                       ) : noTask ? (
                         <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-100 flex items-center justify-center">
                           <span className="text-gray-200 text-xs">휴식</span>
