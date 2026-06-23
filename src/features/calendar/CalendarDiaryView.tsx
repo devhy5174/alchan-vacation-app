@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar } from "react-icons/fi";
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar, FiMinus, FiPlus } from "react-icons/fi";
 import AlertModal from "../../components/AlertModal";
 import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
@@ -10,6 +10,7 @@ import { useRewardStore } from "../../stores/rewardStore";
 import { THEME_COLORS } from "../reward/diaryTheme";
 import type { DiaryTheme } from "../../types/reward";
 import { useStreak } from "../../hooks/useStreak";
+import { loadFromStorage, saveToStorage, DIARY_FONT_STEP_KEY } from "../../utils/localStorage";
 
 const MINI_THEMES: { id: DiaryTheme; color: string; gradient?: string; ringColor: string }[] = [
   { id: 'orange', color: '#fb923c', ringColor: '#fb923c' },
@@ -102,10 +103,21 @@ export default function CalendarDiaryView({ plan }: Props) {
   const [pendingIdx, setPendingIdx] = useState(0);
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [showAlert, setShowAlert] = useState(false);
+  const [fontStep, setFontStepState] = useState<number>(
+    () => loadFromStorage<number>(DIARY_FONT_STEP_KEY) ?? 0
+  );
   const touchStartX = useRef<number | null>(null);
 
-  const fontSize = BASE_FONT;
-  const lineH = BASE_LINE_H;
+  const fontSize = BASE_FONT + fontStep;
+  const lineH = Math.round(BASE_LINE_H * fontSize / BASE_FONT);
+
+  function setFontStep(updater: (s: number) => number) {
+    setFontStepState((s) => {
+      const next = updater(s);
+      saveToStorage(DIARY_FONT_STEP_KEY, next);
+      return next;
+    });
+  }
 
   function navigate(newIdx: number, direction: "next" | "prev") {
     if (phase !== "idle" || newIdx < 0 || newIdx >= dates.length) return;
@@ -468,6 +480,27 @@ export default function CalendarDiaryView({ plan }: Props) {
           <span className="text-xs text-gray-300">
             {idx + 1} / {dates.length}
           </span>
+          <div className="flex items-center gap-0.5 mt-0.5">
+            <button
+              type="button"
+              onClick={() => setFontStep((s) => Math.max(0, s - 1))}
+              disabled={fontStep <= 0}
+              className="w-5 h-5 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+            >
+              <FiMinus size={9} />
+            </button>
+            <span className="text-[9px] text-gray-300 w-7 text-center tabular-nums">
+              {Math.round((fontSize / BASE_FONT) * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontStep((s) => Math.min(8, s + 1))}
+              disabled={fontStep >= 8}
+              className="w-5 h-5 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:text-gray-200 transition-colors cursor-pointer disabled:cursor-default"
+            >
+              <FiPlus size={9} />
+            </button>
+          </div>
         </div>
 
         <button

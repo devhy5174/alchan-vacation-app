@@ -6,6 +6,7 @@ export const SPECIFIC_TASKS_KEY = 'alchan_specific_tasks';
 export const SPECIFIC_COMPLETION_KEY = 'alchan_specific_completion';
 export const REWARD_KEY = 'alchan_reward';
 export const PARENT_REWARDS_KEY = 'alchan_parent_rewards';
+export const DIARY_FONT_STEP_KEY = 'alchan_diary_font_step';
 
 export function loadFromStorage<T>(key: string): T | null {
   try {
