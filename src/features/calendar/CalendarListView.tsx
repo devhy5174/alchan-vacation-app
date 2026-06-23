@@ -34,7 +34,7 @@ export default function CalendarListView({ plan }: Props) {
         const isWeekend = day === 'sat' || day === 'sun';
         const isToday = dateStr === todayStr;
 
-        const specificTasks = specTasks[dateStr] ?? [];
+        const specificTasks = [...(specTasks[dateStr] ?? [])].sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
         const completions = completion[dateStr] ?? [];
         const specDone = specCompletion[dateStr] ?? {};
 

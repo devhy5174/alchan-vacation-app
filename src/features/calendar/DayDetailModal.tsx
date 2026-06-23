@@ -23,7 +23,7 @@ export default function DayDetailModal({ dateStr, plan, milestoneLabel, onClose 
   const date = new Date(dateStr);
   const day = getDayOfWeek(date);
   const weeklyTasks = plan.weeklySchedule?.[day] ?? [];
-  const specificTasks = specTasks[dateStr] ?? [];
+  const specificTasks = [...(specTasks[dateStr] ?? [])].sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
 
   const completions = completion[dateStr] ?? [];
   const specDone = specCompletion[dateStr] ?? {};

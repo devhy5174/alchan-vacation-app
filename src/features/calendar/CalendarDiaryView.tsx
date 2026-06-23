@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar, FiMinus, FiPlus } from "react-icons/fi";
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCalendar, FiMinus, FiPlus, FiStar } from "react-icons/fi";
 import AlertModal from "../../components/AlertModal";
 import type { VacationPlan } from "../../types/vacation";
 import { DAY_LABELS } from "../../types/vacation";
@@ -168,7 +168,7 @@ export default function CalendarDiaryView({ plan }: Props) {
   const dateStr = toDateStr(date);
   const isToday = dateStr === todayStr;
   const completions = completion[dateStr] ?? [];
-  const specificTasks = specTasks[dateStr] ?? [];
+  const specificTasks = [...(specTasks[dateStr] ?? [])].sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
   const specDone = specCompletion[dateStr] ?? {};
   const weeklyDoneCount = weeklyTasks.filter((_, i) => completions[i] ?? false).length;
   const specDoneCount = specificTasks.filter((t) => specDone[t.id] ?? false).length;
@@ -376,8 +376,11 @@ export default function CalendarDiaryView({ plan }: Props) {
                           }}
                         >
                           <CheckMark done={done} doneColor={colors.checkDone} />
+                          {task.important && !done && (
+                            <FiStar size={10} className="shrink-0 mx-1" style={{ color: accentColor, fill: 'currentColor' }} />
+                          )}
                           <span
-                            className={`leading-none ml-2 ${done ? "hand-strike" : ""}`}
+                            className={`leading-none ${task.important && !done ? "" : "ml-2"} ${done ? "hand-strike" : ""}`}
                             style={{
                               fontSize,
                               ...(!done
