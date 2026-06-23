@@ -57,12 +57,12 @@ export default function CalendarPage() {
             type="button"
             onClick={() => setShowStickerBook(true)}
             className="absolute right-0 top-0 flex flex-col items-center gap-0.5 cursor-pointer group"
-            aria-label="스티커판 열기"
+            aria-label="달성판 열기"
           >
             <div className="w-9 h-9 rounded-full bg-orange-100 group-hover:bg-orange-200 transition-colors flex items-center justify-center">
               <FiAward size={18} className="text-orange-400" />
             </div>
-            <span className="text-xs text-orange-400 font-medium">스티커판</span>
+            <span className="text-xs text-orange-400 font-medium">달성판</span>
           </button>
         </div>
 

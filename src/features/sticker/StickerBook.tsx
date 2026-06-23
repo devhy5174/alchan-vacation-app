@@ -271,7 +271,7 @@ export default function StickerBook({ plan, onClose }: Props) {
         <div className="px-5 flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <FiAward size={18} className="text-orange-400" />
-            <h2 className="text-lg font-bold text-gray-800">도장판</h2>
+            <h2 className="text-lg font-bold text-gray-800">달성판</h2>
           </div>
           <button
             type="button"
@@ -321,7 +321,7 @@ export default function StickerBook({ plan, onClose }: Props) {
           </div>
         </div>
 
-        {/* 도장판 그리드 - 5열 */}
+        {/* 달성판 그리드 - 5열 */}
         <div className="px-4 flex flex-col gap-3">
           {rows.map((row, ri) => (
             <div

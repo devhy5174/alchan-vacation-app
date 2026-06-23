@@ -69,7 +69,7 @@ export default function ParentRewardSection({ plan }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-xs text-gray-400 leading-relaxed">
-        날짜와 응원 메시지를 입력하면 스티커판에서 해당 날짜에 표시돼요.
+        날짜와 응원 메시지를 입력하면 달성판에서 해당 날짜에 표시돼요.
       </p>
 
       {/* 삭제 확인 모달 */}
