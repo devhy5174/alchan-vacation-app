@@ -56,12 +56,12 @@ body {
   /* 수료증: #root 숨기고 포털만 표시 */
   body.printing-cert > #root { display: none !important; }
   body.printing-cert > #print-cert-portal {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 210mm;
-    min-height: 297mm;
-    background: white;
+    display: block !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* 달성판: visibility 방식 */
