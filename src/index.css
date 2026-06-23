@@ -43,7 +43,7 @@ body {
 
 @page { size: A4 portrait; margin: 0; }
 
-/* 수료증 PDF 전용 포털 — 화면에서는 숨김 */
+/* PDF 전용 포털 — 화면에서는 숨김 */
 #print-cert-portal { display: none; }
 
 @media print {
@@ -64,27 +64,4 @@ body {
     break-inside: avoid !important;
   }
 
-  /* 달성판: fixed 포지션 해제 후 자연스러운 페이지 흐름 */
-  body.printing-sticker * { visibility: hidden !important; }
-  body.printing-sticker #print-sticker-root {
-    position: static !important;
-    background: none !important;
-  }
-  body.printing-sticker #print-sticker,
-  body.printing-sticker #print-sticker * {
-    visibility: visible !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-  body.printing-sticker #print-sticker {
-    position: relative !important;
-    width: 210mm !important;
-    max-width: none !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    border-radius: 0 !important;
-    margin: 0 auto !important;
-    padding-bottom: 10mm !important;
-  }
 }

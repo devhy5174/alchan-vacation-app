@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiX, FiStar, FiAward, FiGift, FiHeart, FiMessageCircle, FiPrinter } from "react-icons/fi";
+import { FiX, FiStar, FiAward, FiGift, FiHeart, FiMessageCircle } from "react-icons/fi";
 import type { ParentReward } from "../../types/parentReward";
 import type { VacationPlan } from "../../types/vacation";
 import { getDaysInRange, getDayOfWeek, toDateStr } from "../../utils/date";
@@ -276,19 +276,6 @@ export default function StickerBook({ plan, onClose }: Props) {
             <h2 className="text-lg font-bold text-gray-800">달성판</h2>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                document.body.classList.add('printing-sticker');
-                window.addEventListener('afterprint', () => {
-                  document.body.classList.remove('printing-sticker');
-                }, { once: true });
-                window.print();
-              }}
-              className="p-1 text-gray-400 hover:text-orange-400 cursor-pointer transition-colors"
-            >
-              <FiPrinter size={18} />
-            </button>
             <button
               type="button"
               onClick={onClose}
